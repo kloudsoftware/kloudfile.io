@@ -10,11 +10,12 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
-
 
 /**
  *
@@ -50,6 +51,9 @@ public class File implements Serializable {
     @Basic(optional = false)
     @Column(name = "is_image")
     private boolean isImage;
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @ManyToOne(optional = false)
+    private User userId;
 
     public File() {
     }
@@ -106,6 +110,14 @@ public class File implements Serializable {
         this.isImage = isImage;
     }
 
+    public User getUserId() {
+        return userId;
+    }
+
+    public void setUserId(User userId) {
+        this.userId = userId;
+    }
+
     @Override
     public int hashCode() {
         int hash = 0;
@@ -132,3 +144,4 @@ public class File implements Serializable {
     }
 
 }
+
