@@ -51,8 +51,7 @@ public class FileService {
         return ext.equals(".png") || ext.equals(".jpg") || ext.equals(".bmp") || ext.equals(".gif");
     }
 
-    private String saveFile(java.io.FileInputStream fsin, String fileName, boolean isImage) {
-        String path = "";
+    private String saveFile(java.io.FileInputStream fsin,final String fileName, boolean isImage) {
         java.io.File svFile;
         if (!fileDir.exists()) {
             fileDir.mkdir();
@@ -62,14 +61,17 @@ public class FileService {
         }
         if (isImage) {
             svFile = new java.io.File(imageDir.getPath(), fileName);
-            try (FileOutputStream fout = new FileOutputStream(svFile)) {
-                IOUtils.copy(fsin, fout);
-                fout.flush();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        } else {
+            svFile = new java.io.File(fileDir.getPath(), fileName);
         }
-        return path;
+        try (FileOutputStream fout = new FileOutputStream(svFile)) {
+            IOUtils.copy(fsin, fout);
+            fout.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return svFile.getPath();
     }
 
     private boolean checkIfFileExists(final String hash) {
