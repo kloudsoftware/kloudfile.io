@@ -25,8 +25,8 @@ public class FileService {
     @Autowired
     private UserRepository userRepository;
 
-    private final java.io.File fileDir = new java.io.File("files");
-    private final java.io.File imageDir = new java.io.File("images");
+    private final java.io.File fileDir = new java.io.File(System.getProperty("user.home") + "/push/files");
+    private final java.io.File imageDir = new java.io.File(System.getProperty("user.home") + "/push/images");
 
     public FileRepository getFileRepository() {
         return fileRepository;
