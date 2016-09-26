@@ -2,7 +2,9 @@ package me.probE466.persistence.services;
 
 
 import me.probE466.persistence.entities.File;
+import me.probE466.persistence.entities.User;
 import me.probE466.persistence.repos.FileRepository;
+import me.probE466.persistence.repos.UserRepository;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -16,14 +18,21 @@ import java.security.NoSuchAlgorithmException;
 @Component
 public class FileService {
 
+
     @Autowired
     private FileRepository fileRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     private final java.io.File fileDir = new java.io.File("files");
     private final java.io.File imageDir = new java.io.File("images");
 
+    public FileRepository getFileRepository() {
+        return fileRepository;
+    }
 
-    public boolean createFile(final InputStream fsin, String fileName) {
+    public boolean createFile(InputStream fsin, final String fileName, User user) {
         File dstFile = new File();
         String hash = "";
         try {
@@ -39,10 +48,12 @@ public class FileService {
         dstFile.setName(fileName);
         dstFile.setPath(saveFile(fsin, fileName, dstFile.getIsImage()));
         fileRepository.save(dstFile);
+        user.getFileList().add(dstFile);
+        userRepository.save(user);
         return true;
     }
 
-    private boolean isImage(String fileName) {
+    private boolean isImage(final String fileName) {
         String[] strArr = fileName.split("\\.");
         if (strArr.length <= 1) {
             throw new UnsupportedOperationException();
@@ -75,7 +86,8 @@ public class FileService {
     }
 
     private boolean checkIfFileExists(final String hash) {
-        return fileRepository.findAll().stream().anyMatch(file -> file.getHash().equals(hash));
+        return fileRepository.findByHash(hash).isPresent();
+//        return fileRepository.findAll().stream().anyMatch(file -> file.getHash().equals(hash));
     }
 
     private String calcSHA1(final InputStream input) throws IOException, NoSuchAlgorithmException {
