@@ -91,18 +91,18 @@ public class FileService {
     }
 
     private String calcSHA2(final InputStream input) throws IOException, NoSuchAlgorithmException {
-        MessageDigest sha1 = MessageDigest.getInstance("SHA-256");
+        MessageDigest sha2 = MessageDigest.getInstance("SHA-256");
         input.mark(input.available());
         byte[] buffer = new byte[8192];
         int len = input.read(buffer);
 
         while (len != -1) {
-            sha1.update(buffer, 0, len);
+            sha2.update(buffer, 0, len);
             len = input.read(buffer);
         }
 
         input.reset();
-        return new HexBinaryAdapter().marshal(sha1.digest());
+        return new HexBinaryAdapter().marshal(sha2.digest());
     }
 
 }
