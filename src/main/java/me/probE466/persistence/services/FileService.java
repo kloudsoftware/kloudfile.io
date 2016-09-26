@@ -36,7 +36,7 @@ public class FileService {
         File dstFile = new File();
         String hash = "";
         try {
-            hash = calcSHA1(fsin);
+            hash = calcSHA2(fsin);
         } catch (IOException | NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
@@ -90,7 +90,7 @@ public class FileService {
 //        return fileRepository.findAll().stream().anyMatch(file -> file.getHash().equals(hash));
     }
 
-    private String calcSHA1(final InputStream input) throws IOException, NoSuchAlgorithmException {
+    private String calcSHA2(final InputStream input) throws IOException, NoSuchAlgorithmException {
         MessageDigest sha1 = MessageDigest.getInstance("SHA-256");
         input.mark(input.available());
         byte[] buffer = new byte[8192];
