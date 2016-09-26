@@ -23,7 +23,7 @@ public class FileService {
     private final java.io.File imageDir = new java.io.File("images");
 
 
-    public boolean createFile(final java.io.FileInputStream fsin, String fileName) {
+    public boolean createFile(final InputStream fsin, String fileName) {
         File dstFile = new File();
         String hash = "";
         try {
@@ -44,14 +44,14 @@ public class FileService {
 
     private boolean isImage(String fileName) {
         String[] strArr = fileName.split("\\.");
-        if (strArr.length < 1) {
+        if (strArr.length <= 1) {
             throw new UnsupportedOperationException();
         }
         String ext = strArr[strArr.length - 1];
         return ext.equals(".png") || ext.equals(".jpg") || ext.equals(".bmp") || ext.equals(".gif");
     }
 
-    private String saveFile(java.io.FileInputStream fsin,final String fileName, boolean isImage) {
+    private String saveFile(InputStream fsin, final String fileName, boolean isImage) {
         java.io.File svFile;
         if (!fileDir.exists()) {
             fileDir.mkdir();
@@ -78,7 +78,7 @@ public class FileService {
         return fileRepository.findAll().stream().anyMatch(file -> file.getHash().equals(hash));
     }
 
-    private String calcSHA1(final java.io.FileInputStream input) throws IOException, NoSuchAlgorithmException {
+    private String calcSHA1(final InputStream input) throws IOException, NoSuchAlgorithmException {
         MessageDigest sha1 = MessageDigest.getInstance("SHA-256");
         input.mark(input.available());
         byte[] buffer = new byte[8192];
@@ -88,6 +88,7 @@ public class FileService {
             sha1.update(buffer, 0, len);
             len = input.read(buffer);
         }
+
         input.reset();
         return new HexBinaryAdapter().marshal(sha1.digest());
     }
