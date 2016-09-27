@@ -30,7 +30,6 @@ import javax.xml.bind.annotation.XmlRootElement;
         @NamedQuery(name = "File.findAll", query = "SELECT f FROM File f"),
         @NamedQuery(name = "File.findById", query = "SELECT f FROM File f WHERE f.id = :id"),
         @NamedQuery(name = "File.findByFileName", query = "SELECT f FROM File f WHERE f.fileName = :fileName"),
-        @NamedQuery(name = "File.findByFileHash", query = "SELECT f FROM File f WHERE f.fileHash = :fileHash"),
         @NamedQuery(name = "File.findByFilePath", query = "SELECT f FROM File f WHERE f.filePath = :filePath"),
         @NamedQuery(name = "File.findByIsImage", query = "SELECT f FROM File f WHERE f.isImage = :isImage")})
 public class File implements Serializable {

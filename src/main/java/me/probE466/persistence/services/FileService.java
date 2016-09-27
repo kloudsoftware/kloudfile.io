@@ -5,6 +5,7 @@ import me.probE466.persistence.entities.File;
 import me.probE466.persistence.entities.User;
 import me.probE466.persistence.repos.FileRepository;
 import me.probE466.persistence.repos.UserRepository;
+import org.apache.tomcat.jni.Buffer;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -47,6 +48,7 @@ public class FileService {
         dstFile.setFileHash(hash);
         dstFile.setFileName(fileName);
         dstFile.setFilePath(saveFile(fsin, fileName, dstFile.getIsImage()));
+        dstFile.setUserId(user);
         fileRepository.save(dstFile);
         user.getFileList().add(dstFile);
         userRepository.save(user);
@@ -59,11 +61,12 @@ public class FileService {
             throw new UnsupportedOperationException();
         }
         String ext = strArr[strArr.length - 1];
-        return ext.equals(".png") || ext.equals(".jpg") || ext.equals(".bmp") || ext.equals(".gif");
+        return ext.equals("png") || ext.equals("jpg") || ext.equals("bmp") || ext.equals("gif");
     }
 
-    private String saveFile(InputStream fsin, final String fileName, boolean isImage) {
+    private String saveFile(InputStream fsin, String fileName, boolean isImage) {
         java.io.File svFile;
+        fileName = fileName.replaceAll("\\s+","");
         if (!fileDir.exists()) {
             fileDir.mkdir();
         }
@@ -74,6 +77,11 @@ public class FileService {
             svFile = new java.io.File(imageDir.getPath(), fileName);
         } else {
             svFile = new java.io.File(fileDir.getPath(), fileName);
+        }
+        try {
+            svFile.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         try (FileOutputStream fout = new FileOutputStream(svFile)) {
             IOUtils.copy(fsin, fout);
@@ -92,7 +100,8 @@ public class FileService {
 
     private String calcSHA2(final InputStream input) throws IOException, NoSuchAlgorithmException {
         MessageDigest sha2 = MessageDigest.getInstance("SHA-256");
-        input.mark(input.available());
+        BufferedInputStream buf = new BufferedInputStream(input);
+        buf.mark(input.available());
         byte[] buffer = new byte[8192];
         int len = input.read(buffer);
 
@@ -101,7 +110,7 @@ public class FileService {
             len = input.read(buffer);
         }
 
-        input.reset();
+        buf.reset();
         return new HexBinaryAdapter().marshal(sha2.digest());
     }
 

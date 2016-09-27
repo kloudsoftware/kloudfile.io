@@ -44,7 +44,7 @@ public class WebController {
     public ResponseEntity postFile(@RequestParam(value = "file") MultipartFile file, @RequestParam String key) throws IOException {
         Optional<User> user = userRepository.findByUserKey(key);
         if (user.isPresent()) {
-            fileService.createFile(file.getInputStream(), file.getName(), user.get());
+            fileService.createFile(file.getInputStream(), file.getOriginalFilename(), user.get());
         } else {
             throw new SecurityException("API KEY NOT RECOGNIZED");
         }
