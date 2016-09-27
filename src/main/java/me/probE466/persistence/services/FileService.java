@@ -36,8 +36,11 @@ public class FileService {
     public boolean createFile(InputStream fsin, final String fileName, User user) {
         File dstFile = new File();
         String hash = "";
+        BufferedInputStream in = new BufferedInputStream(fsin);
         try {
-            hash = calcSHA2(fsin);
+            in.mark(in.available());
+            hash = calcSHA2(in);
+            in.reset();
         } catch (IOException | NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
@@ -47,7 +50,7 @@ public class FileService {
         dstFile.setIsImage(isImage(fileName));
         dstFile.setFileHash(hash);
         dstFile.setFileName(fileName);
-        dstFile.setFilePath(saveFile(fsin, fileName, dstFile.getIsImage()));
+        dstFile.setFilePath(saveFile(in, fileName, dstFile.getIsImage()));
         dstFile.setUserId(user);
         fileRepository.save(dstFile);
         user.getFileList().add(dstFile);
@@ -64,7 +67,7 @@ public class FileService {
         return ext.equals("png") || ext.equals("jpg") || ext.equals("bmp") || ext.equals("gif");
     }
 
-    private String saveFile(InputStream fsin, String fileName, boolean isImage) {
+    private String saveFile(BufferedInputStream fsin, String fileName, boolean isImage) {
         java.io.File svFile;
         fileName = fileName.replaceAll("\\s+","");
         if (!fileDir.exists()) {
@@ -98,10 +101,8 @@ public class FileService {
 //        return fileRepository.findAll().stream().anyMatch(file -> file.getHash().equals(hash));
     }
 
-    private String calcSHA2(final InputStream input) throws IOException, NoSuchAlgorithmException {
+    private String calcSHA2(BufferedInputStream input) throws IOException, NoSuchAlgorithmException {
         MessageDigest sha2 = MessageDigest.getInstance("SHA-256");
-        BufferedInputStream buf = new BufferedInputStream(input);
-        buf.mark(input.available());
         byte[] buffer = new byte[8192];
         int len = input.read(buffer);
 
@@ -110,7 +111,6 @@ public class FileService {
             len = input.read(buffer);
         }
 
-        buf.reset();
         return new HexBinaryAdapter().marshal(sha2.digest());
     }
 
