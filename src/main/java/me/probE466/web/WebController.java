@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.io.IOException;
+import java.util.Optional;
 
 
 @Controller
@@ -33,17 +34,17 @@ public class WebController {
     public ModelAndView getTest() {
 //        fileService.createFile(null, null);
         User user = new User();
-        user.setKey("secret");
-        user.setName("admin");
+        user.setUserKey("secret");
+        user.setUserName("admin");
         userRepository.save(user);
         return new ModelAndView("basic");
     }
 
     @RequestMapping(value = "/post", method = RequestMethod.POST)
     public ResponseEntity postFile(@RequestParam(value = "file") MultipartFile file, @RequestParam String key) throws IOException {
-        User user = userRepository.findByKey(key);
-        if (user != null) {
-            fileService.createFile(file.getInputStream(), file.getName(), user);
+        Optional<User> user = userRepository.findByUserKey(key);
+        if (user.isPresent()) {
+            fileService.createFile(file.getInputStream(), file.getName(), user.get());
         } else {
             throw new SecurityException("API KEY NOT RECOGNIZED");
         }

@@ -1,8 +1,10 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package me.probE466.persistence.entities;
 
-/**
- * Created by larsg on 25.09.2016.
- */
 import java.io.Serializable;
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -19,17 +21,17 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
- * @author larsg
+ * @author larsgrahmann
  */
 @Entity
-@Table(name = "file")
+@Table(name = "File")
 @XmlRootElement
 @NamedQueries({
         @NamedQuery(name = "File.findAll", query = "SELECT f FROM File f"),
         @NamedQuery(name = "File.findById", query = "SELECT f FROM File f WHERE f.id = :id"),
-        @NamedQuery(name = "File.findByName", query = "SELECT f FROM File f WHERE f.name = :name"),
-        @NamedQuery(name = "File.findByHash", query = "SELECT f FROM File f WHERE f.hash = :hash"),
-        @NamedQuery(name = "File.findByPath", query = "SELECT f FROM File f WHERE f.path = :path"),
+        @NamedQuery(name = "File.findByFileName", query = "SELECT f FROM File f WHERE f.fileName = :fileName"),
+        @NamedQuery(name = "File.findByFileHash", query = "SELECT f FROM File f WHERE f.fileHash = :fileHash"),
+        @NamedQuery(name = "File.findByFilePath", query = "SELECT f FROM File f WHERE f.filePath = :filePath"),
         @NamedQuery(name = "File.findByIsImage", query = "SELECT f FROM File f WHERE f.isImage = :isImage")})
 public class File implements Serializable {
 
@@ -40,14 +42,14 @@ public class File implements Serializable {
     @Column(name = "id")
     private Integer id;
     @Basic(optional = false)
-    @Column(name = "name")
-    private String name;
+    @Column(name = "file_name")
+    private String fileName;
     @Basic(optional = false)
-    @Column(name = "hash")
-    private String hash;
+    @Column(name = "file_hash")
+    private String fileHash;
     @Basic(optional = false)
-    @Column(name = "path")
-    private String path;
+    @Column(name = "file_path")
+    private String filePath;
     @Basic(optional = false)
     @Column(name = "is_image")
     private boolean isImage;
@@ -62,11 +64,11 @@ public class File implements Serializable {
         this.id = id;
     }
 
-    public File(Integer id, String name, String hash, String path, boolean isImage) {
+    public File(Integer id, String fileName, String fileHash, String filePath, boolean isImage) {
         this.id = id;
-        this.name = name;
-        this.hash = hash;
-        this.path = path;
+        this.fileName = fileName;
+        this.fileHash = fileHash;
+        this.filePath = filePath;
         this.isImage = isImage;
     }
 
@@ -78,28 +80,28 @@ public class File implements Serializable {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getFileName() {
+        return fileName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
-    public String getHash() {
-        return hash;
+    public String getFileHash() {
+        return fileHash;
     }
 
-    public void setHash(String hash) {
-        this.hash = hash;
+    public void setFileHash(String fileHash) {
+        this.fileHash = fileHash;
     }
 
-    public String getPath() {
-        return path;
+    public String getFilePath() {
+        return filePath;
     }
 
-    public void setPath(String path) {
-        this.path = path;
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
     }
 
     public boolean getIsImage() {
@@ -144,4 +146,3 @@ public class File implements Serializable {
     }
 
 }
-

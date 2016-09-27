@@ -9,6 +9,5 @@ import java.util.Optional;
  * Created by larsg on 25.09.2016.
  */
 public interface FileRepository extends JpaRepository<File, Integer> {
-    // TODO: 26.09.2016 Verify this
-    Optional<File> findByHash(String hash);
+    Optional<File> findByFileHash(String hash);
 }

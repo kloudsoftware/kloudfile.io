@@ -44,9 +44,9 @@ public class FileService {
             throw new EntityExistsException();
         }
         dstFile.setIsImage(isImage(fileName));
-        dstFile.setHash(hash);
-        dstFile.setName(fileName);
-        dstFile.setPath(saveFile(fsin, fileName, dstFile.getIsImage()));
+        dstFile.setFileHash(hash);
+        dstFile.setFileName(fileName);
+        dstFile.setFilePath(saveFile(fsin, fileName, dstFile.getIsImage()));
         fileRepository.save(dstFile);
         user.getFileList().add(dstFile);
         userRepository.save(user);
@@ -86,7 +86,7 @@ public class FileService {
     }
 
     private boolean checkIfFileExists(final String hash) {
-        return fileRepository.findByHash(hash).isPresent();
+        return fileRepository.findByFileHash(hash).isPresent();
 //        return fileRepository.findAll().stream().anyMatch(file -> file.getHash().equals(hash));
     }
 
