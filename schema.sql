@@ -18,10 +18,12 @@ USE `push` ;
 -- -----------------------------------------------------
 -- Table `push`.`User`
 -- -----------------------------------------------------
+DROP TABLE IF EXISTS `push`.`User` ;
+
 CREATE TABLE IF NOT EXISTS `push`.`User` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `key` VARCHAR(1000) NULL,
-  `name` VARCHAR(1000) NULL,
+  `user_key` VARCHAR(1000) NULL,
+  `user_name` VARCHAR(1000) NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 
@@ -29,11 +31,13 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 -- Table `push`.`File`
 -- -----------------------------------------------------
+DROP TABLE IF EXISTS `push`.`File` ;
+
 CREATE TABLE IF NOT EXISTS `push`.`File` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `name` VARCHAR(1000) NOT NULL,
-  `hash` VARCHAR(1000) NOT NULL,
-  `path` VARCHAR(1000) NOT NULL,
+  `file_name` VARCHAR(1000) NOT NULL,
+  `file_hash` VARCHAR(1000) NOT NULL,
+  `file_path` VARCHAR(1000) NOT NULL,
   `is_image` TINYINT(1) NOT NULL,
   `user_id` INT NOT NULL,
   PRIMARY KEY (`id`),
