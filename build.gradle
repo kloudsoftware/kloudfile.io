@@ -33,5 +33,8 @@ dependencies {
 	compile('org.thymeleaf:thymeleaf-spring4')
 	//compile('org.springframework.boot:spring-boot-starter-security')
 	compile('org.springframework.boot:spring-boot-starter-web')
+	// https://mvnrepository.com/artifact/commons-lang/commons-lang
+	compile group: 'commons-lang', name: 'commons-lang', version: '2.6'
+
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 }

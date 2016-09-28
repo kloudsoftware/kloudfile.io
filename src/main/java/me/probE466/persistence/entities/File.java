@@ -21,17 +21,19 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
- * @author larsgrahmann
+ * @author larsg
  */
 @Entity
-@Table(name = "File")
+@Table(name = "file")
 @XmlRootElement
-@NamedQueries({
-        @NamedQuery(name = "File.findAll", query = "SELECT f FROM File f"),
-        @NamedQuery(name = "File.findById", query = "SELECT f FROM File f WHERE f.id = :id"),
-        @NamedQuery(name = "File.findByFileName", query = "SELECT f FROM File f WHERE f.fileName = :fileName"),
-        @NamedQuery(name = "File.findByFilePath", query = "SELECT f FROM File f WHERE f.filePath = :filePath"),
-        @NamedQuery(name = "File.findByIsImage", query = "SELECT f FROM File f WHERE f.isImage = :isImage")})
+//@NamedQueries({
+//        @NamedQuery(name = "File.findAll", query = "SELECT f FROM File f"),
+//        @NamedQuery(name = "File.findById", query = "SELECT f FROM File f WHERE f.id = :id"),
+//        @NamedQuery(name = "File.findByFileName", query = "SELECT f FROM File f WHERE f.fileName = :fileName"),
+//        @NamedQuery(name = "File.findByFileHash", query = "SELECT f FROM File f WHERE f.fileHash = :fileHash"),
+//        @NamedQuery(name = "File.findByFilePath", query = "SELECT f FROM File f WHERE f.filePath = :filePath"),
+//        @NamedQuery(name = "File.findByIsImage", query = "SELECT f FROM File f WHERE f.isImage = :isImage"),
+//        @NamedQuery(name = "File.findByFileUrl", query = "SELECT f FROM File f WHERE f.fileUrl = :fileUrl")})
 public class File implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -52,6 +54,9 @@ public class File implements Serializable {
     @Basic(optional = false)
     @Column(name = "is_image")
     private boolean isImage;
+    @Basic(optional = false)
+    @Column(name = "file_url")
+    private String fileUrl;
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private User userId;
@@ -63,12 +68,13 @@ public class File implements Serializable {
         this.id = id;
     }
 
-    public File(Integer id, String fileName, String fileHash, String filePath, boolean isImage) {
+    public File(Integer id, String fileName, String fileHash, String filePath, boolean isImage, String fileUrl) {
         this.id = id;
         this.fileName = fileName;
         this.fileHash = fileHash;
         this.filePath = filePath;
         this.isImage = isImage;
+        this.fileUrl = fileUrl;
     }
 
     public Integer getId() {
@@ -109,6 +115,14 @@ public class File implements Serializable {
 
     public void setIsImage(boolean isImage) {
         this.isImage = isImage;
+    }
+
+    public String getFileUrl() {
+        return fileUrl;
+    }
+
+    public void setFileUrl(String fileUrl) {
+        this.fileUrl = fileUrl;
     }
 
     public User getUserId() {
