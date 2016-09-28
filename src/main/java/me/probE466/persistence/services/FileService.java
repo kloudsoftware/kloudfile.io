@@ -6,7 +6,6 @@ import me.probE466.persistence.entities.User;
 import me.probE466.persistence.repos.FileRepository;
 import me.probE466.persistence.repos.UserRepository;
 import org.apache.commons.lang.RandomStringUtils;
-import org.apache.tomcat.jni.Buffer;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -14,26 +13,21 @@ import org.springframework.stereotype.Component;
 import javax.persistence.EntityExistsException;
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import java.io.*;
-import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 @Component
 public class FileService {
 
 
-    @Autowired
-    private FileRepository fileRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
     private final java.io.File fileDir = new java.io.File(System.getProperty("user.home") + "/push/files");
     private final java.io.File imageDir = new java.io.File(System.getProperty("user.home") + "/push/images");
+    @Autowired
+    private FileRepository fileRepository;
+    @Autowired
+    private UserRepository userRepository;
     private SecureRandom random = new SecureRandom();
 
 
@@ -67,7 +61,7 @@ public class FileService {
         user.getFileList().add(dstFile);
         userRepository.save(user);
         String returnString = "";
-        if(dstFile.getIsImage()) {
+        if (dstFile.getIsImage()) {
             returnString += "/img/";
         } else {
             returnString += "/file/";
@@ -116,12 +110,8 @@ public class FileService {
         } else {
             svFile = new java.io.File(fileDir.getPath(), fileName);
         }
-        try {
-            svFile.createNewFile();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         try (FileOutputStream fout = new FileOutputStream(svFile)) {
+            svFile.createNewFile();
             IOUtils.copy(fsin, fout);
             fout.flush();
         } catch (IOException e) {
