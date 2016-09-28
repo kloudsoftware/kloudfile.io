@@ -45,9 +45,10 @@ public class FileService {
         File dstFile = new File();
         String hash = "";
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        byte[] bytes = null;
         try {
             IOUtils.copy(fsin, baos);
-            byte[] bytes = baos.toByteArray();
+            bytes = baos.toByteArray();
             ByteArrayInputStream bsin = new ByteArrayInputStream(bytes);
             hash = calcSHA2(bsin);
         } catch (IOException | NoSuchAlgorithmException e) {
@@ -59,13 +60,20 @@ public class FileService {
         dstFile.setIsImage(isImage(fileName));
         dstFile.setFileHash(hash);
         dstFile.setFileName(fileName);
-        dstFile.setFilePath(saveFile(fsin, fileName, dstFile.getIsImage()));
+        dstFile.setFilePath(saveFile(new ByteArrayInputStream(bytes != null ? bytes : new byte[0]), fileName, dstFile.getIsImage()));
         dstFile.setUserId(user);
         dstFile.setFileUrl(generateFileUrl());
         fileRepository.save(dstFile);
         user.getFileList().add(dstFile);
         userRepository.save(user);
-        return dstFile.getFileUrl();
+        String returnString = "";
+        if(dstFile.getIsImage()) {
+            returnString += "/img/";
+        } else {
+            returnString += "/file/";
+        }
+        returnString += dstFile.getFileUrl();
+        return returnString;
     }
 
     private String generateFileUrl() {
@@ -90,7 +98,7 @@ public class FileService {
         if (strArr.length <= 1) {
             throw new UnsupportedOperationException();
         }
-        String ext = strArr[strArr.length - 1];
+        String ext = strArr[strArr.length - 1].toLowerCase();
         return ext.equals("png") || ext.equals("jpg") || ext.equals("bmp") || ext.equals("gif");
     }
 
