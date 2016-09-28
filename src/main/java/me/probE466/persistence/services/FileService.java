@@ -110,8 +110,12 @@ public class FileService {
         } else {
             svFile = new java.io.File(fileDir.getPath(), fileName);
         }
-        try (FileOutputStream fout = new FileOutputStream(svFile)) {
+        try {
             svFile.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try (FileOutputStream fout = new FileOutputStream(svFile)) {
             IOUtils.copy(fsin, fout);
             fout.flush();
         } catch (IOException e) {
