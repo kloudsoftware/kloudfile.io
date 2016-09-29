@@ -40,7 +40,6 @@ public class WebController {
 
     @RequestMapping("/admin")
     public ModelAndView getTest() {
-//        fileService.createFile(null, null);
         User user = new User();
         user.setUserKey("secret");
         user.setUserName("admin");

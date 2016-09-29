@@ -11,4 +11,5 @@ import java.util.Optional;
 public interface FileRepository extends JpaRepository<File, Integer> {
     Optional<File> findByFileHash(String hash);
     Optional<File> findByFileUrl(String fileUrl);
+    Optional<File> findByFileName(String fileName);
 }

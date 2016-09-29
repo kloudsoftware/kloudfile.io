@@ -54,9 +54,9 @@ public class FileService {
         dstFile.setIsImage(isImage(fileName));
         dstFile.setFileHash(hash);
         dstFile.setFileName(fileName);
-        dstFile.setFilePath(saveFile(new ByteArrayInputStream(bytes != null ? bytes : new byte[0]), fileName, dstFile.getIsImage()));
-        dstFile.setUserId(user);
         dstFile.setFileUrl(generateFileUrl());
+        dstFile.setFilePath(saveFile(new ByteArrayInputStream(bytes != null ? bytes : new byte[0]), dstFile.getIsImage()));
+        dstFile.setUserId(user);
         fileRepository.save(dstFile);
         user.getFileList().add(dstFile);
         userRepository.save(user);
@@ -96,15 +96,20 @@ public class FileService {
         return ext.equals("png") || ext.equals("jpg") || ext.equals("bmp") || ext.equals("gif");
     }
 
-    private String saveFile(InputStream fsin, String fileName, boolean isImage) {
+    private String saveFile(InputStream fsin, boolean isImage) {
         java.io.File svFile;
-        fileName = fileName.replaceAll("\\s+", "");
+        String fileName = UUID.randomUUID().toString();
         if (!fileDir.exists()) {
             fileDir.mkdirs();
         }
         if (!imageDir.exists()) {
             imageDir.mkdirs();
         }
+
+        if(fileRepository.findByFileName(fileName).isPresent()) {
+            fileName += UUID.randomUUID().toString();
+        }
+
         if (isImage) {
             svFile = new java.io.File(imageDir.getPath(), fileName);
         } else {
