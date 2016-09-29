@@ -38,7 +38,7 @@ public class WebController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @RequestMapping("/test")
+    @RequestMapping("/admin")
     public ModelAndView getTest() {
 //        fileService.createFile(null, null);
         User user = new User();
@@ -46,6 +46,14 @@ public class WebController {
         user.setUserName("admin");
         userRepository.save(user);
         return new ModelAndView("basic");
+    }
+
+    public String createUser() {
+        User user = new User();
+        user.setUserKey("secret");
+        user.setUserName("admin");
+        userRepository.save(user);
+        return user.getUserKey();
     }
 
     @RequestMapping(value = "/post", method = RequestMethod.POST, produces = "text/plain")
