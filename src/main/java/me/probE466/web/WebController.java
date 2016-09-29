@@ -4,6 +4,7 @@ import me.probE466.persistence.entities.File;
 import me.probE466.persistence.entities.User;
 import me.probE466.persistence.repos.UserRepository;
 import me.probE466.persistence.services.FileService;
+import org.apache.commons.lang.RandomStringUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -21,7 +22,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Optional;
+import java.util.Random;
+import java.util.UUID;
 
 
 @Controller
@@ -32,19 +36,43 @@ public class WebController {
     @Autowired
     private UserRepository userRepository;
 
+    private final SecureRandom secureRandom = new SecureRandom();
+
+
     @RequestMapping("/")
     public ResponseEntity getRoot() {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @RequestMapping("/admin")
+    @RequestMapping(value = "/admin", method = RequestMethod.GET)
     public ModelAndView getTest() {
-        User user = new User();
-        user.setUserKey("secret");
-        user.setUserName("admin");
-        userRepository.save(user);
-        return new ModelAndView("basic");
+        return new ModelAndView("addapi");
     }
+
+    @RequestMapping(value = "/admin", method = RequestMethod.POST)
+    public @ResponseBody String addApiKey(@RequestParam("userName") String userName) {
+        User user = new User();
+        String key = generateSecureApiKey(32);
+        user.setUserKey(key);
+        user.setUserName(userName);
+        userRepository.save(user);
+        return key;
+    }
+
+
+    private String generateSecureApiKey(int length) {
+        char[] validChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456879".toCharArray();
+        Random random = new Random();
+        char[] buffer = new char[length];
+        for (int i = 0; i < length; ++i) {
+            if ((i % 10) == 0) {
+                random.setSeed(secureRandom.nextLong());
+            }
+            buffer[i] = validChars[random.nextInt(validChars.length)];
+        }
+        return new String(buffer);
+    }
+
 
     @RequestMapping(value = "/post", method = RequestMethod.POST, produces = "text/plain")
     public

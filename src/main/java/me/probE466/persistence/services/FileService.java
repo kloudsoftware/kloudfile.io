@@ -130,6 +130,8 @@ public class FileService {
         try (FileOutputStream fout = new FileOutputStream(svFile)) {
             IOUtils.copy(fsin, fout);
             fout.flush();
+        } finally {
+            fsin.close();
         }
 
         return svFile.getPath();

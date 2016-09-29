@@ -22,9 +22,11 @@ DROP TABLE IF EXISTS `push`.`User` ;
 
 CREATE TABLE IF NOT EXISTS `push`.`User` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `user_key` VARCHAR(1000) NULL,
-  `user_name` VARCHAR(1000) NULL,
-  PRIMARY KEY (`id`))
+  `user_key` VARCHAR(255) NULL,
+  `user_name` VARCHAR(255) NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `user_key_UNIQUE` (`user_key` ASC),
+  UNIQUE INDEX `user_name_UNIQUE` (`user_name` ASC))
 ENGINE = InnoDB;
 
 
