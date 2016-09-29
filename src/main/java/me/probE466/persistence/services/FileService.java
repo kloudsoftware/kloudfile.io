@@ -35,27 +35,32 @@ public class FileService {
         return fileRepository;
     }
 
-    public String createFile(InputStream fsin, final String fileName, User user) {
+    public String createFile(InputStream fsin, final String fileName, User user) throws IOException, NoSuchAlgorithmException {
         File dstFile = new File();
         String hash = "";
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         byte[] bytes = null;
+        ByteArrayInputStream bsin = null;
         try {
             IOUtils.copy(fsin, baos);
             bytes = baos.toByteArray();
-            ByteArrayInputStream bsin = new ByteArrayInputStream(bytes);
+            bsin = new ByteArrayInputStream(bytes);
             hash = calcSHA2(bsin);
-        } catch (IOException | NoSuchAlgorithmException e) {
-            e.printStackTrace();
+        } finally {
+            if (bsin != null) {
+                bsin.close();
+            }
         }
-        if (checkIfFileExists(hash)) {
+        if (fileRepository.findByFileHash(hash).isPresent()) {
             throw new EntityExistsException();
         }
         dstFile.setIsImage(isImage(fileName));
         dstFile.setFileHash(hash);
         dstFile.setFileName(fileName);
         dstFile.setFileUrl(generateFileUrl());
-        dstFile.setFilePath(saveFile(new ByteArrayInputStream(bytes != null ? bytes : new byte[0]), dstFile.getIsImage()));
+        try (final ByteArrayInputStream bain = new ByteArrayInputStream(bytes != null ? bytes : new byte[0])){
+            dstFile.setFilePath(saveFile(bain, dstFile.getIsImage()));
+        }
         dstFile.setUserId(user);
         fileRepository.save(dstFile);
         user.getFileList().add(dstFile);
@@ -96,7 +101,7 @@ public class FileService {
         return ext.equals("png") || ext.equals("jpg") || ext.equals("bmp") || ext.equals("gif");
     }
 
-    private String saveFile(InputStream fsin, boolean isImage) {
+    private String saveFile(InputStream fsin, boolean isImage) throws IOException {
         java.io.File svFile;
         String fileName = UUID.randomUUID().toString();
         if (!fileDir.exists()) {
@@ -115,24 +120,13 @@ public class FileService {
         } else {
             svFile = new java.io.File(fileDir.getPath(), fileName);
         }
-        try {
-            svFile.createNewFile();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        svFile.createNewFile();
         try (FileOutputStream fout = new FileOutputStream(svFile)) {
             IOUtils.copy(fsin, fout);
             fout.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
 
         return svFile.getPath();
-    }
-
-    private boolean checkIfFileExists(final String hash) {
-        return fileRepository.findByFileHash(hash).isPresent();
-//        return fileRepository.findAll().stream().anyMatch(file -> file.getHash().equals(hash));
     }
 
     private String calcSHA2(InputStream input) throws IOException, NoSuchAlgorithmException {
