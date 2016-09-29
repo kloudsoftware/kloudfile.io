@@ -52,15 +52,21 @@ public class FileService {
             }
         }
         if (fileRepository.findByFileHash(hash).isPresent()) {
-            throw new EntityExistsException();
+            File foundFile = fileRepository.findByFileHash(hash).get();
+            String foundUrl = "";
+            if(foundFile.getIsImage()) {
+                foundUrl += "/img/";
+            } else {
+                foundUrl += "/file/";
+            }
+            foundUrl += foundFile.getFileUrl();
+            return foundUrl;
         }
         dstFile.setIsImage(isImage(fileName));
         dstFile.setFileHash(hash);
         dstFile.setFileName(fileName);
         dstFile.setFileUrl(generateFileUrl());
-        try (final ByteArrayInputStream bain = new ByteArrayInputStream(bytes != null ? bytes : new byte[0])){
-            dstFile.setFilePath(saveFile(bain, dstFile.getIsImage()));
-        }
+        dstFile.setFilePath(saveFile(new ByteArrayInputStream(bytes != null ? bytes : new byte[0]), dstFile.getIsImage()));
         dstFile.setUserId(user);
         fileRepository.save(dstFile);
         user.getFileList().add(dstFile);
@@ -77,14 +83,14 @@ public class FileService {
 
     private String generateFileUrl() {
         boolean done = false;
-        float probability = 6.0f;
+        float probability = 5.0f;
         while (!done) {
             String tmpUrl = RandomStringUtils.randomAlphanumeric((int) probability);
             boolean collided = fileRepository.findByFileUrl(tmpUrl).isPresent();
             if (!collided) {
                 return tmpUrl;
             }
-            probability += 0.5f;
+            probability += 0.25f;
             if (probability == 10.0f) {
                 done = true;
             }
@@ -128,6 +134,7 @@ public class FileService {
 
         return svFile.getPath();
     }
+
 
     private String calcSHA2(InputStream input) throws IOException, NoSuchAlgorithmException {
         MessageDigest sha2 = MessageDigest.getInstance("SHA-256");
