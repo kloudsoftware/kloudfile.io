@@ -4,7 +4,6 @@ import me.probE466.persistence.entities.File;
 import me.probE466.persistence.entities.User;
 import me.probE466.persistence.repos.UserRepository;
 import me.probE466.persistence.services.FileService;
-import org.apache.commons.lang.RandomStringUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -25,19 +24,16 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Optional;
 import java.util.Random;
-import java.util.UUID;
 
 
 @Controller
 public class WebController {
 
+    private final SecureRandom secureRandom = new SecureRandom();
     @Autowired
     private FileService fileService;
     @Autowired
     private UserRepository userRepository;
-
-    private final SecureRandom secureRandom = new SecureRandom();
-
 
     @RequestMapping("/")
     public ResponseEntity getRoot() {
@@ -50,7 +46,9 @@ public class WebController {
     }
 
     @RequestMapping(value = "/admin", method = RequestMethod.POST)
-    public @ResponseBody String addApiKey(@RequestParam("userName") String userName) {
+    public
+    @ResponseBody
+    String addApiKey(@RequestParam("userName") String userName) {
         User user = new User();
         String key = generateSecureApiKey(32);
         user.setUserKey(key);
