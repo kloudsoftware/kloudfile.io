@@ -40,22 +40,22 @@ public class WebController {
         return new ModelAndView("basic");
     }
 
-    @RequestMapping(value = "/admin", method = RequestMethod.GET)
-    public ModelAndView getTest() {
-        return new ModelAndView("addapi");
-    }
-
-    @RequestMapping(value = "/admin", method = RequestMethod.POST)
-    public
-    @ResponseBody
-    String addApiKey(@RequestParam("userName") String userName) {
-        User user = new User();
-        String key = generateSecureApiKey(32);
-        user.setUserKey(key);
-        user.setUserName(userName);
-        userRepository.save(user);
-        return key;
-    }
+//    @RequestMapping(value = "/admin", method = RequestMethod.GET)
+//    public ModelAndView getTest() {
+//        return new ModelAndView("addapi");
+//    }
+//
+//    @RequestMapping(value = "/admin", method = RequestMethod.POST)
+//    public
+//    @ResponseBody
+//    String addApiKey(@RequestParam("userName") String userName) {
+//        User user = new User();
+//        String key = generateSecureApiKey(32);
+//        user.setUserKey(key);
+//        user.setUserName(userName);
+//        userRepository.save(user);
+//        return key;
+//    }
 
 
     private String generateSecureApiKey(int length) {
