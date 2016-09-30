@@ -36,8 +36,8 @@ public class WebController {
     private UserRepository userRepository;
 
     @RequestMapping("/")
-    public ResponseEntity getRoot() {
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ModelAndView getRoot() {
+        return new ModelAndView("basic");
     }
 
     @RequestMapping(value = "/admin", method = RequestMethod.GET)
