@@ -55,7 +55,7 @@ public class FileService {
             File foundFile = fileRepository.findByFileHash(hash).get();
             String foundUrl = "";
             if(foundFile.getIsImage()) {
-                foundUrl += "/images/";
+                foundUrl += "/img/";
             } else {
                 foundUrl += "/file/";
             }
@@ -73,7 +73,7 @@ public class FileService {
         userRepository.save(user);
         String returnString = "";
         if (dstFile.getIsImage()) {
-            returnString += "/images/";
+            returnString += "/img/";
         } else {
             returnString += "/file/";
         }
