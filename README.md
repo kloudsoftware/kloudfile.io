@@ -1,4 +1,3 @@
-# push
-My custom Push server backend
+# kloudfile
 
-This will work as my private push service for files
+This is a self-hosted all inclusive file and image sharing solution.
