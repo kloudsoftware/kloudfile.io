@@ -22,8 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 
 
 @Controller
@@ -41,8 +40,34 @@ public class WebController {
     }
 
     @RequestMapping(value = "/admin", method = RequestMethod.GET)
-    public ModelAndView getTest() {
+    public ModelAndView getAddApi() {
         return new ModelAndView("addapi");
+    }
+
+    @RequestMapping(value = "/admin/list", method = RequestMethod.GET)
+    public ModelAndView listApiKeys() {
+        ModelAndView modelAndView = new ModelAndView("listapi");
+        Map<String, String> userKeyMap = new HashMap<>();
+        List<User> users = userRepository.findAll();
+
+        for (User user : users) {
+            userKeyMap.put(user.getUserName(), user.getUserKey());
+        }
+
+        modelAndView.addObject("map", userKeyMap);
+        return modelAndView;
+    }
+
+    @RequestMapping(value = "/admin/revoke/{key}")
+    public String revokeUserKey(@PathVariable("key") String key) {
+        Optional<User> userOptional = userRepository.findByUserKey(key);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            userRepository.delete(user);
+        } else {
+            throw new EntityNotFoundException("User not found");
+        }
+        return "redirect:/admin/list";
     }
 
     @RequestMapping(value = "/admin", method = RequestMethod.POST)
@@ -95,20 +120,19 @@ public class WebController {
     @ResponseBody
     ResponseEntity<byte[]> getImage(@PathVariable("imgUrl") String imgUrl) throws IOException {
         Optional<File> oFile = fileService.getFileRepository().findByFileUrl(imgUrl);
-        ByteArrayOutputStream bain = null;
+        ByteArrayOutputStream baout = null;
         FileInputStream fsin = null;
         try {
             if (oFile.isPresent() && oFile.get().getIsImage()) {
                 File file = oFile.get();
                 fsin = new FileInputStream(new java.io.File(file.getFilePath()));
-                bain = new ByteArrayOutputStream();
-                IOUtils.copy(fsin, bain);
+                baout = new ByteArrayOutputStream();
+                IOUtils.copy(fsin, baout);
                 HttpHeaders httpHeaders = new HttpHeaders();
                 httpHeaders.setContentType(MediaType.IMAGE_PNG);
-                return new ResponseEntity<>(bain.toByteArray(), httpHeaders, HttpStatus.OK);
+                return new ResponseEntity<>(baout.toByteArray(), httpHeaders, HttpStatus.OK);
             } else {
-                // TODO: 9/29/2016 Maybe return a 404 response here?
-                throw new EntityNotFoundException("IMAGE NOT FOUND");
+                return new ResponseEntity<>(new byte[]{0}, HttpStatus.NOT_FOUND);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -117,8 +141,8 @@ public class WebController {
                 fsin.close();
             }
 
-            if (bain != null) {
-                bain.close();
+            if (baout != null) {
+                baout.close();
             }
         }
         return new ResponseEntity<>(new byte[]{0}, HttpStatus.INTERNAL_SERVER_ERROR);
