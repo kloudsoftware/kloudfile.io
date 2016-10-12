@@ -101,7 +101,7 @@ public class FileService {
     private boolean isImage(final String fileName) {
         String[] strArr = fileName.split("\\.");
         if (strArr.length <= 1) {
-            throw new UnsupportedOperationException();
+            return false;
         }
         String ext = strArr[strArr.length - 1].toLowerCase();
         return ext.equals("png") || ext.equals("jpg") || ext.equals("bmp") || ext.equals("gif");
