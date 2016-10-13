@@ -24,12 +24,11 @@ public class FileService {
 
     private final java.io.File fileDir = new java.io.File(System.getProperty("user.home") + "/push/files");
     private final java.io.File imageDir = new java.io.File(System.getProperty("user.home") + "/push/images");
+
     @Autowired
     private FileRepository fileRepository;
     @Autowired
     private UserRepository userRepository;
-    private SecureRandom random = new SecureRandom();
-
 
     public FileRepository getFileRepository() {
         return fileRepository;
