@@ -4,23 +4,28 @@ import me.probE466.persistence.entities.File;
 import me.probE466.persistence.entities.User;
 import me.probE466.persistence.repos.UserRepository;
 import me.probE466.persistence.services.FileService;
-import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.apache.tomcat.util.http.fileupload.*;
+import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
+import org.apache.tomcat.util.http.fileupload.util.Streams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import javax.persistence.EntityNotFoundException;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Part;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.*;
-
 
 @Controller
 public class WebController {
@@ -94,21 +99,53 @@ public class WebController {
     }
 
 
-    @RequestMapping(value = "/post", method = RequestMethod.POST, produces = "text/plain")
+    @RequestMapping(value = "/post", method = RequestMethod.POST, produces = "text/plain", headers="Accept=*/*", consumes = "multipart/*")
     public
     @ResponseBody
-    String postFile(@RequestParam(value = "file") MultipartFile file, @RequestParam String key) throws IOException {
-        Optional<User> user = userRepository.findByUserKey(key);
+    String postFile(HttpServletRequest request) throws IOException, FileUploadException {
+//        Optional<User> user = userRepository.findByUserKey(key);
         String url = "";
-        if (user.isPresent()) {
-            try (final InputStream inputStream = file.getInputStream()) {
-                url = fileService.createFile(inputStream, file.getOriginalFilename(), user.get());
-            } catch (NoSuchAlgorithmException e) {
-                e.printStackTrace();
+        ServletFileUpload servletFileUpload = new ServletFileUpload();
+        FileItemIterator iterator  = servletFileUpload.getItemIterator(request);
+        String key;
+        InputStream filein = null;
+        String fileName = "tempfile" + UUID.randomUUID().toString() + System.currentTimeMillis();
+        String originalFileName = "";
+
+        while (iterator.hasNext()) {
+            FileItemStream fileItem = iterator.next();
+            if(fileItem.isFormField()) {
+                InputStream is = fileItem.openStream();
+                key = Streams.asString(is);
+                if(!userRepository.findByUserKey(key).isPresent()) {
+                    throw new SecurityException("API KEY NOT RECOGNIZED");
+                }
+            } else {
+                filein = fileItem.openStream();
+                java.io.File file = new java.io.File(fileName);
+                originalFileName = fileItem.getName();
+                FileOutputStream fileOutputStream = new FileOutputStream(file);
+                IOUtils.copy(filein, fileOutputStream);
+                fileOutputStream.flush();
+                fileOutputStream.close();
             }
-        } else {
-            throw new SecurityException("API KEY NOT RECOGNIZED");
         }
+
+        try {
+            url = fileService.createFile(filein, originalFileName, null);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } finally {
+            if (filein != null) {
+                filein.close();
+            }
+        }
+
+//        if (user.isPresent()) {
+
+//        } else {
+//            throw new SecurityException("API KEY NOT RECOGNIZED");
+//        }
         return url;
     }
 
