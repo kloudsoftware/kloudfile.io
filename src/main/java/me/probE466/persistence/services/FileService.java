@@ -34,26 +34,16 @@ public class FileService {
         return fileRepository;
     }
 
-    public String createFile(InputStream fsin, final String fileName, User user) throws IOException, NoSuchAlgorithmException {
+    public String createFile(java.io.File fsinFile, final String fileName, User user) throws IOException, NoSuchAlgorithmException {
         File dstFile = new File();
-        String hash = "";
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        byte[] bytes = null;
-        ByteArrayInputStream bsin = null;
-        try {
-            IOUtils.copy(fsin, baos);
-            bytes = baos.toByteArray();
-            bsin = new ByteArrayInputStream(bytes);
-            hash = calcSHA2(bsin);
-        } finally {
-            if (bsin != null) {
-                bsin.close();
-            }
+        String hash;
+        try (FileInputStream hashStream = new FileInputStream(fsinFile)) {
+            hash = calcSHA2(hashStream);
         }
         if (fileRepository.findByFileHash(hash).isPresent()) {
             File foundFile = fileRepository.findByFileHash(hash).get();
             String foundUrl = "";
-            if(foundFile.getIsImage()) {
+            if (foundFile.getIsImage()) {
                 foundUrl += "/img/";
             } else {
                 foundUrl += "/file/";
@@ -65,7 +55,9 @@ public class FileService {
         dstFile.setFileHash(hash);
         dstFile.setFileName(fileName);
         dstFile.setFileUrl(generateFileUrl());
-        dstFile.setFilePath(saveFile(new ByteArrayInputStream(bytes != null ? bytes : new byte[0]), dstFile.getIsImage()));
+        try (FileInputStream saveFileIn = new FileInputStream(fsinFile)) {
+            dstFile.setFilePath(saveFile(saveFileIn, dstFile.getIsImage()));
+        }
         dstFile.setUserId(user);
         fileRepository.save(dstFile);
         user.getFileList().add(dstFile);
@@ -116,7 +108,7 @@ public class FileService {
             imageDir.mkdirs();
         }
 
-        if(fileRepository.findByFileName(fileName).isPresent()) {
+        if (fileRepository.findByFileName(fileName).isPresent()) {
             fileName += UUID.randomUUID().toString();
         }
 
