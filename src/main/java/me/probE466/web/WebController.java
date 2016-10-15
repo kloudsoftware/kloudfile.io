@@ -145,11 +145,8 @@ public class WebController {
 
         try {
             if (authorizedRequest) {
-                FileInputStream fsin = new FileInputStream(file);
-                url = fileService.createFile(fsin, originalFileName, user);
+                url = fileService.createFile(file, originalFileName, user);
                 file.delete();
-                fsin.close();
-
             } else if (badFile) {
                 throw new FileUploadException("bad file");
             } else {
