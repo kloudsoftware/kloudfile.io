@@ -1,5 +1,6 @@
 package me.probE466.web;
 
+import javassist.tools.web.BadHttpRequest;
 import me.probE466.persistence.entities.File;
 import me.probE466.persistence.entities.User;
 import me.probE466.persistence.repos.UserRepository;
@@ -85,7 +86,8 @@ public class WebController {
     }
 
 
-    private String generateSecureApiKey(int length) {
+    private String
+    generateSecureApiKey(int length) {
         char[] validChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456879".toCharArray();
         Random random = new Random();
         char[] buffer = new char[length];
@@ -99,30 +101,36 @@ public class WebController {
     }
 
 
-    @RequestMapping(value = "/post", method = RequestMethod.POST, produces = "text/plain", headers="Accept=*/*", consumes = "multipart/*")
+    @RequestMapping(value = "/post", method = RequestMethod.POST, produces = "text/plain", headers = "Accept=*/*", consumes = "multipart/*")
     public
     @ResponseBody
     String postFile(HttpServletRequest request) throws IOException, FileUploadException {
 //        Optional<User> user = userRepository.findByUserKey(key);
         String url = "";
         ServletFileUpload servletFileUpload = new ServletFileUpload();
-        FileItemIterator iterator  = servletFileUpload.getItemIterator(request);
+        FileItemIterator iterator = servletFileUpload.getItemIterator(request);
         String key;
+        User user = null;
         InputStream filein = null;
         String fileName = "tempfile" + UUID.randomUUID().toString() + System.currentTimeMillis();
         String originalFileName = "";
+        java.io.File file = null;
+        boolean authorizedRequest = false;
+        boolean badFile = false;
 
         while (iterator.hasNext()) {
             FileItemStream fileItem = iterator.next();
-            if(fileItem.isFormField()) {
+            if (fileItem.isFormField()) {
                 InputStream is = fileItem.openStream();
                 key = Streams.asString(is);
-                if(!userRepository.findByUserKey(key).isPresent()) {
-                    throw new SecurityException("API KEY NOT RECOGNIZED");
+                if (userRepository.findByUserKey(key).isPresent()) {
+                    user = userRepository.findByUserKey(key).get();
+                    authorizedRequest = true;
                 }
             } else {
                 filein = fileItem.openStream();
-                java.io.File file = new java.io.File(fileName);
+                file = new java.io.File(fileName);
+                file.createNewFile();
                 originalFileName = fileItem.getName();
                 FileOutputStream fileOutputStream = new FileOutputStream(file);
                 IOUtils.copy(filein, fileOutputStream);
@@ -131,21 +139,34 @@ public class WebController {
             }
         }
 
+        if (file == null) {
+            badFile = true;
+        }
+
         try {
-            url = fileService.createFile(filein, originalFileName, null);
+            if (authorizedRequest) {
+                FileInputStream fsin = new FileInputStream(file);
+                url = fileService.createFile(fsin, originalFileName, user);
+                file.delete();
+                fsin.close();
+
+            } else if (badFile) {
+                throw new FileUploadException("bad file");
+            } else {
+                if (file != null) {
+                    file.delete();
+                }
+                throw new SecurityException("API KEY NOT RECOGNIZED");
+            }
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         } finally {
             if (filein != null) {
                 filein.close();
             }
+            file.delete();
         }
 
-//        if (user.isPresent()) {
-
-//        } else {
-//            throw new SecurityException("API KEY NOT RECOGNIZED");
-//        }
         return url;
     }
 
