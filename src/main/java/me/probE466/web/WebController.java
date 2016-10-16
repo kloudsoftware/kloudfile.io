@@ -150,9 +150,7 @@ public class WebController {
             } else if (badFile) {
                 throw new FileUploadException("bad file");
             } else {
-                if (file != null) {
-                    file.delete();
-                }
+                file.delete();
                 throw new SecurityException("API KEY NOT RECOGNIZED");
             }
         } catch (NoSuchAlgorithmException e) {
