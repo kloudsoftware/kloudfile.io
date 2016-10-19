@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.text.DecimalFormat;
 import java.util.*;
 
 @Controller
@@ -51,8 +52,22 @@ public class WebController {
             userStatListMap.put(user.getUserName(), String.valueOf(user.getFileList().size()));
         }
 
+        long freeSpace = new java.io.File("/").getFreeSpace();
+        long usedSpace = fileService.size();
+
+
+        mav.addObject("freespace", getReadableSize(freeSpace));
+        mav.addObject("usedspace", getReadableSize(usedSpace));
         mav.addObject("map", userStatListMap);
         return mav;
+    }
+
+    public String getReadableSize(long size) {
+        if(size <= 0) return "0";
+        final String[] units = new String[] { "B", "KB", "MB", "GB", "TB" };
+        int digitGroups = (int) (Math.log10(size)/Math.log10(1024));
+        return new DecimalFormat("#,##0.#").format(size/Math.pow(1024, digitGroups))
+                + " " + units[digitGroups];
     }
 
     @RequestMapping(value = "/admin", method = RequestMethod.GET)
@@ -99,8 +114,7 @@ public class WebController {
     }
 
 
-    private String
-    generateSecureApiKey(int length) {
+    private String generateSecureApiKey(int length) {
         char[] validChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456879".toCharArray();
         Random random = new Random();
         char[] buffer = new char[length];

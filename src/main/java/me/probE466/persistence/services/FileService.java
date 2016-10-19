@@ -13,10 +13,13 @@ import org.springframework.stereotype.Component;
 import javax.persistence.EntityExistsException;
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import java.io.*;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Component
 public class FileService {
@@ -24,6 +27,7 @@ public class FileService {
 
     private final java.io.File fileDir = new java.io.File(System.getProperty("user.home") + "/push/files");
     private final java.io.File imageDir = new java.io.File(System.getProperty("user.home") + "/push/images");
+    private final java.io.File pushDir = new java.io.File(System.getProperty("user.home") + "/push");
 
     @Autowired
     private FileRepository fileRepository;
@@ -140,6 +144,46 @@ public class FileService {
         }
 
         return new HexBinaryAdapter().marshal(sha2.digest());
+    }
+
+    public long size() {
+        final AtomicLong size = new AtomicLong(0);
+        Path path = Paths.get(pushDir.toURI());
+
+        try {
+            Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult
+                visitFile(Path file, BasicFileAttributes attrs) {
+
+                    size.addAndGet(attrs.size());
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult
+                visitFileFailed(Path file, IOException exc) {
+
+                    System.out.println("skipped: " + file + " (" + exc + ")");
+                    // Skip folders that can't be traversed
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult
+                postVisitDirectory(Path dir, IOException exc) {
+
+                    if (exc != null)
+                        System.out.println("had trouble traversing: " + dir + " (" + exc + ")");
+                    // Ignore errors traversing a folder
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return size.get();
     }
 
 }
