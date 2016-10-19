@@ -1,25 +1,24 @@
 package me.probE466.web;
 
-import javassist.tools.web.BadHttpRequest;
 import me.probE466.persistence.entities.File;
 import me.probE466.persistence.entities.User;
 import me.probE466.persistence.repos.UserRepository;
 import me.probE466.persistence.services.FileService;
-import org.apache.tomcat.util.http.fileupload.*;
+import org.apache.tomcat.util.http.fileupload.FileItemIterator;
+import org.apache.tomcat.util.http.fileupload.FileItemStream;
+import org.apache.tomcat.util.http.fileupload.FileUploadException;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
 import org.apache.tomcat.util.http.fileupload.util.Streams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.Part;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -40,6 +39,20 @@ public class WebController {
     @RequestMapping("/")
     public ModelAndView getRoot() {
         return new ModelAndView("basic");
+    }
+
+    @RequestMapping("/stats")
+    public ModelAndView getStats() {
+        ModelAndView mav = new ModelAndView("stats");
+        List<User> userList = userRepository.findAll();
+        Map<String, String> userStatListMap = new HashMap<>();
+
+        for (User user : userList) {
+            userStatListMap.put(user.getUserName(), String.valueOf(user.getFileList().size()));
+        }
+
+        mav.addObject("map", userStatListMap);
+        return mav;
     }
 
     @RequestMapping(value = "/admin", method = RequestMethod.GET)
@@ -105,10 +118,9 @@ public class WebController {
     public
     @ResponseBody
     String postFile(HttpServletRequest request) throws IOException, FileUploadException {
-//        Optional<User> user = userRepository.findByUserKey(key);
-        String url = "";
         ServletFileUpload servletFileUpload = new ServletFileUpload();
         FileItemIterator iterator = servletFileUpload.getItemIterator(request);
+        String url = "";
         String key;
         User user = null;
         InputStream filein = null;
@@ -130,7 +142,7 @@ public class WebController {
             } else {
                 filein = fileItem.openStream();
                 file = new java.io.File(fileName);
-                file.createNewFile();
+                badFile = !file.createNewFile();
                 originalFileName = fileItem.getName();
                 FileOutputStream fileOutputStream = new FileOutputStream(file);
                 IOUtils.copy(filein, fileOutputStream);
