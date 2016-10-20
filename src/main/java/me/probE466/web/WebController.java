@@ -23,6 +23,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.management.ManagementFactory;
+import java.lang.management.OperatingSystemMXBean;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.text.DecimalFormat;
@@ -56,13 +58,15 @@ public class WebController {
         long usedSpace = fileService.size();
 
 
-        mav.addObject("freespace", getReadableSize(freeSpace));
-        mav.addObject("usedspace", getReadableSize(usedSpace));
+        mav.addObject("systemload", "Systemload: " + ManagementFactory.getOperatingSystemMXBean().getSystemLoadAverage());
+        mav.addObject("ramload", "RAM Usage: " + getReadableSize(ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getUsed()));
+        mav.addObject("freespace", "Free Space: " + getReadableSize(freeSpace));
+        mav.addObject("usedspace", "Used Space: " + getReadableSize(usedSpace));
         mav.addObject("map", userStatListMap);
         return mav;
     }
 
-    public String getReadableSize(long size) {
+    private String getReadableSize(long size) {
         if(size <= 0) return "0";
         final String[] units = new String[] { "B", "KB", "MB", "GB", "TB" };
         int digitGroups = (int) (Math.log10(size)/Math.log10(1024));
