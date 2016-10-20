@@ -38,22 +38,14 @@ public class FileService {
         return fileRepository;
     }
 
-    public String createFile(java.io.File fsinFile, final String fileName, User user) throws IOException, NoSuchAlgorithmException {
+    public File createFile(java.io.File fsinFile, final String fileName, User user) throws IOException, NoSuchAlgorithmException {
         File dstFile = new File();
         String hash;
         try (FileInputStream hashStream = new FileInputStream(fsinFile)) {
             hash = calcSHA2(hashStream);
         }
         if (fileRepository.findByFileHash(hash).isPresent()) {
-            File foundFile = fileRepository.findByFileHash(hash).get();
-            String foundUrl = "";
-            if (foundFile.getIsImage()) {
-                foundUrl += "/img/";
-            } else {
-                foundUrl += "/file/";
-            }
-            foundUrl += foundFile.getFileUrl();
-            return foundUrl;
+            return fileRepository.findByFileHash(hash).get();
         }
         dstFile.setIsImage(isImage(fileName));
         dstFile.setFileHash(hash);
@@ -67,14 +59,7 @@ public class FileService {
         fileRepository.save(dstFile);
         user.getFileList().add(dstFile);
         userRepository.save(user);
-        String returnString = "";
-        if (dstFile.getIsImage()) {
-            returnString += "/img/";
-        } else {
-            returnString += "/file/";
-        }
-        returnString += dstFile.getFileUrl();
-        return returnString;
+        return dstFile;
     }
 
     private String generateFileUrl() {

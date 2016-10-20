@@ -137,13 +137,13 @@ public class WebController {
     String postFile(HttpServletRequest request) throws IOException, FileUploadException {
         ServletFileUpload servletFileUpload = new ServletFileUpload();
         FileItemIterator iterator = servletFileUpload.getItemIterator(request);
-        String url = "";
         String key;
         User user = null;
         InputStream filein = null;
         String fileName = "tempfile" + UUID.randomUUID().toString() + System.currentTimeMillis();
         String originalFileName = "";
         java.io.File file = null;
+        File fileServiceFile = null;
         boolean authorizedRequest = false;
         boolean badFile = false;
 
@@ -174,7 +174,7 @@ public class WebController {
 
         try {
             if (authorizedRequest) {
-                url = fileService.createFile(file, originalFileName, user);
+                fileServiceFile = fileService.createFile(file, originalFileName, user);
                 file.delete();
             } else if (badFile) {
                 throw new FileUploadException("bad file");
@@ -191,7 +191,18 @@ public class WebController {
             file.delete();
         }
 
-        return url;
+
+        String returnString = "";
+        if (fileServiceFile != null) {
+            if (fileServiceFile.getIsImage()) {
+                returnString += "/img/";
+            } else {
+                returnString += "/file/";
+            }
+        }
+        returnString += fileServiceFile != null ? fileServiceFile.getFileUrl() : null;
+
+        return returnString;
     }
 
     @RequestMapping(value = "/img/{imgUrl}", method = RequestMethod.GET)
