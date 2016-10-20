@@ -24,7 +24,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
-import java.lang.management.OperatingSystemMXBean;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.text.DecimalFormat;
@@ -209,6 +208,8 @@ public class WebController {
                 response.setContentLengthLong(fsin.available());
                 IOUtils.copy(fsin, response.getOutputStream());
                 response.flushBuffer();
+                file.setFileViewed(file.getFileViewed() + 1);
+                fileService.getFileRepository().save(file);
             } else {
                 response.sendError(404);
             }
@@ -239,6 +240,8 @@ public class WebController {
                 IOUtils.copy(fsin, response.getOutputStream());
                 fsin.close();
                 response.flushBuffer();
+                file.setFileViewed(file.getFileViewed() + 1);
+                fileService.getFileRepository().save(file);
             } else {
                 throw new EntityNotFoundException("FILE NOT FOUND");
             }

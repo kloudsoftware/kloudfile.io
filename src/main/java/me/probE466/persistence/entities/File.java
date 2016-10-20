@@ -6,6 +6,7 @@
 package me.probE466.persistence.entities;
 
 import java.io.Serializable;
+import java.util.Date;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -17,11 +18,13 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
- * @author larsg
+ * @author larsgrahmann
  */
 @Entity
 @Table(name = "file")
@@ -33,7 +36,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 //        @NamedQuery(name = "File.findByFileHash", query = "SELECT f FROM File f WHERE f.fileHash = :fileHash"),
 //        @NamedQuery(name = "File.findByFilePath", query = "SELECT f FROM File f WHERE f.filePath = :filePath"),
 //        @NamedQuery(name = "File.findByIsImage", query = "SELECT f FROM File f WHERE f.isImage = :isImage"),
-//        @NamedQuery(name = "File.findByFileUrl", query = "SELECT f FROM File f WHERE f.fileUrl = :fileUrl")})
+//        @NamedQuery(name = "File.findByFileUrl", query = "SELECT f FROM File f WHERE f.fileUrl = :fileUrl"),
+//        @NamedQuery(name = "File.findByFileDeleteUrl", query = "SELECT f FROM File f WHERE f.fileDeleteUrl = :fileDeleteUrl"),
+//        @NamedQuery(name = "File.findByFileViewed", query = "SELECT f FROM File f WHERE f.fileViewed = :fileViewed"),
+//        @NamedQuery(name = "File.findByFileDateCreated", query = "SELECT f FROM File f WHERE f.fileDateCreated = :fileDateCreated"),
+//        @NamedQuery(name = "File.findByFileDateUpdated", query = "SELECT f FROM File f WHERE f.fileDateUpdated = :fileDateUpdated")})
 public class File implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -57,6 +64,18 @@ public class File implements Serializable {
     @Basic(optional = false)
     @Column(name = "file_url")
     private String fileUrl;
+    @Basic(optional = false)
+    @Column(name = "file_delete_url")
+    private String fileDeleteUrl;
+    @Basic(optional = false)
+    @Column(name = "file_viewed")
+    private long fileViewed;
+    @Column(name = "file_date_created")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date fileDateCreated;
+    @Column(name = "file_date_updated")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date fileDateUpdated;
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private User userId;
@@ -68,13 +87,15 @@ public class File implements Serializable {
         this.id = id;
     }
 
-    public File(Integer id, String fileName, String fileHash, String filePath, boolean isImage, String fileUrl) {
+    public File(Integer id, String fileName, String fileHash, String filePath, boolean isImage, String fileUrl, String fileDeleteUrl, long fileViewed) {
         this.id = id;
         this.fileName = fileName;
         this.fileHash = fileHash;
         this.filePath = filePath;
         this.isImage = isImage;
         this.fileUrl = fileUrl;
+        this.fileDeleteUrl = fileDeleteUrl;
+        this.fileViewed = fileViewed;
     }
 
     public Integer getId() {
@@ -123,6 +144,38 @@ public class File implements Serializable {
 
     public void setFileUrl(String fileUrl) {
         this.fileUrl = fileUrl;
+    }
+
+    public String getFileDeleteUrl() {
+        return fileDeleteUrl;
+    }
+
+    public void setFileDeleteUrl(String fileDeleteUrl) {
+        this.fileDeleteUrl = fileDeleteUrl;
+    }
+
+    public long getFileViewed() {
+        return fileViewed;
+    }
+
+    public void setFileViewed(long fileViewed) {
+        this.fileViewed = fileViewed;
+    }
+
+    public Date getFileDateCreated() {
+        return fileDateCreated;
+    }
+
+    public void setFileDateCreated(Date fileDateCreated) {
+        this.fileDateCreated = fileDateCreated;
+    }
+
+    public Date getFileDateUpdated() {
+        return fileDateUpdated;
+    }
+
+    public void setFileDateUpdated(Date fileDateUpdated) {
+        this.fileDateUpdated = fileDateUpdated;
     }
 
     public User getUserId() {

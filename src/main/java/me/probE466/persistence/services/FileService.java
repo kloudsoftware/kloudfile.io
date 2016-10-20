@@ -62,6 +62,7 @@ public class FileService {
         try (FileInputStream saveFileIn = new FileInputStream(fsinFile)) {
             dstFile.setFilePath(saveFile(saveFileIn, dstFile.getIsImage()));
         }
+        dstFile.setFileDeleteUrl(dstFile.getFileUrl() + generateFileUrl());
         dstFile.setUserId(user);
         fileRepository.save(dstFile);
         user.getFileList().add(dstFile);
@@ -81,7 +82,7 @@ public class FileService {
         float probability = 5.0f;
         while (!done) {
             String tmpUrl = RandomStringUtils.randomAlphanumeric((int) probability);
-            boolean collided = fileRepository.findByFileUrl(tmpUrl).isPresent();
+            boolean collided = fileRepository.findByFileUrl(tmpUrl).isPresent() || fileRepository.findByFileDeleteUrl(tmpUrl).isPresent();
             if (!collided) {
                 return tmpUrl;
             }
