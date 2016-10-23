@@ -213,8 +213,8 @@ public class WebController {
         return jsonResponse;
     }
 
-    @RequestMapping(value = "/delete/{fileUrl}", method = RequestMethod.GET)
-    public @ResponseBody String deleteFile(@PathVariable("fileUrl") String fileUrl) throws IOException {
+    @RequestMapping(value = "/delete/{fileDeleteUrl}", method = RequestMethod.GET)
+    public @ResponseBody String deleteFile(@PathVariable("fileDeleteUrl") String fileUrl) throws IOException {
         final Optional<File> fileOptional = fileService.getFileRepository().findByFileDeleteUrl(fileUrl);
 
         if (fileOptional.isPresent()) {
