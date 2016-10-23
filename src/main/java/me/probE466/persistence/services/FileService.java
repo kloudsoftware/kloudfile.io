@@ -85,7 +85,7 @@ public class FileService {
             return false;
         }
         String ext = strArr[strArr.length - 1].toLowerCase();
-        return ext.equals("png") || ext.equals("jpg") || ext.equals("bmp") || ext.equals("gif");
+        return ext.equals("png") || ext.equals("jpg") || ext.equals("bmp") || ext.equals("gif") || ext.equals("jpeg");
     }
 
     private String saveFile(InputStream fsin, boolean isImage) throws IOException {

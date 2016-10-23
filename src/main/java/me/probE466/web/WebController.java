@@ -1,5 +1,6 @@
 package me.probE466.web;
 
+import com.google.gson.Gson;
 import me.probE466.persistence.entities.File;
 import me.probE466.persistence.entities.User;
 import me.probE466.persistence.repos.UserRepository;
@@ -38,6 +39,9 @@ public class WebController {
     @Autowired
     private UserRepository userRepository;
 
+    private final Gson GSON = new Gson();
+
+
     @RequestMapping("/")
     public ModelAndView getRoot() {
         return new ModelAndView("basic");
@@ -66,10 +70,10 @@ public class WebController {
     }
 
     private String getReadableSize(long size) {
-        if(size <= 0) return "0";
-        final String[] units = new String[] { "B", "KB", "MB", "GB", "TB" };
-        int digitGroups = (int) (Math.log10(size)/Math.log10(1024));
-        return new DecimalFormat("#,##0.#").format(size/Math.pow(1024, digitGroups))
+        if (size <= 0) return "0";
+        final String[] units = new String[]{"B", "KB", "MB", "GB", "TB"};
+        int digitGroups = (int) (Math.log10(size) / Math.log10(1024));
+        return new DecimalFormat("#,##0.#").format(size / Math.pow(1024, digitGroups))
                 + " " + units[digitGroups];
     }
 
@@ -146,6 +150,7 @@ public class WebController {
         File fileServiceFile = null;
         boolean authorizedRequest = false;
         boolean badFile = false;
+        String jsonResponse = "";
 
         while (iterator.hasNext()) {
             FileItemStream fileItem = iterator.next();
@@ -192,17 +197,21 @@ public class WebController {
         }
 
 
-        String returnString = "";
+        String contextString = "";
         if (fileServiceFile != null) {
             if (fileServiceFile.getIsImage()) {
-                returnString += "/img/";
+                contextString += "/img/";
             } else {
-                returnString += "/file/";
+                contextString += "/file/";
             }
         }
-        returnString += fileServiceFile != null ? fileServiceFile.getFileUrl() : null;
+        contextString += fileServiceFile != null ? fileServiceFile.getFileUrl() : null;
 
-        return returnString;
+        if (fileServiceFile != null) {
+            jsonResponse = GSON.toJson(new UrlDTO(contextString, fileServiceFile.getFileDeleteUrl()));
+        }
+
+        return jsonResponse;
     }
 
     @RequestMapping(value = "/img/{imgUrl}", method = RequestMethod.GET)
