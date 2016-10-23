@@ -207,7 +207,7 @@ public class WebController {
         contextString += fileServiceFile != null ? fileServiceFile.getFileUrl() : null;
 
         if (fileServiceFile != null) {
-            jsonResponse = GSON.toJson(new UrlDTO(contextString, fileServiceFile.getFileDeleteUrl()));
+            jsonResponse = GSON.toJson(new UrlDTO(contextString, "/delete/" + fileServiceFile.getFileDeleteUrl()));
         }
 
         return jsonResponse;
