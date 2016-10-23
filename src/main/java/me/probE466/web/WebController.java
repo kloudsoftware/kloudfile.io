@@ -25,6 +25,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
+import java.nio.file.Files;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.text.DecimalFormat;
@@ -34,13 +35,11 @@ import java.util.*;
 public class WebController {
 
     private final SecureRandom secureRandom = new SecureRandom();
+    private final Gson GSON = new Gson();
     @Autowired
     private FileService fileService;
     @Autowired
     private UserRepository userRepository;
-
-    private final Gson GSON = new Gson();
-
 
     @RequestMapping("/")
     public ModelAndView getRoot() {
@@ -212,6 +211,22 @@ public class WebController {
         }
 
         return jsonResponse;
+    }
+
+    @RequestMapping(value = "/delete/{fileDeleteUrl}", method = RequestMethod.GET)
+    public @ResponseBody String deleteFile(@PathVariable("fileDeleteUrl") String fileUrl) throws IOException {
+        final Optional<File> fileOptional = fileService.getFileRepository().findByFileDeleteUrl(fileUrl);
+
+        if (fileOptional.isPresent()) {
+            final File file = fileOptional.get();
+            final java.io.File javaFile = new java.io.File(file.getFilePath());
+            if (javaFile.delete()) {
+                fileService.getFileRepository().delete(file);
+                return "File deleted!";
+            }
+        }
+
+        return "Error, please try again";
     }
 
     @RequestMapping(value = "/img/{imgUrl}", method = RequestMethod.GET)
