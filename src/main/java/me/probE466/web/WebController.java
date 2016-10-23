@@ -12,7 +12,9 @@ import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
 import org.apache.tomcat.util.http.fileupload.util.Streams;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
@@ -214,7 +216,8 @@ public class WebController {
     }
 
     @RequestMapping(value = "/delete/{fileDeleteUrl}", method = RequestMethod.GET)
-    public @ResponseBody String deleteFile(@PathVariable("fileDeleteUrl") String fileUrl) throws IOException {
+    public @ResponseBody
+    ResponseEntity deleteFile(@PathVariable("fileDeleteUrl") String fileUrl) throws IOException {
         final Optional<File> fileOptional = fileService.getFileRepository().findByFileDeleteUrl(fileUrl);
 
         if (fileOptional.isPresent()) {
@@ -222,11 +225,11 @@ public class WebController {
             final java.io.File javaFile = new java.io.File(file.getFilePath());
             if (javaFile.delete()) {
                 fileService.getFileRepository().delete(file);
-                return "File deleted!";
+                return new ResponseEntity(HttpStatus.OK);
             }
         }
 
-        return "Error, please try again";
+        return new ResponseEntity(HttpStatus.NOT_ACCEPTABLE);
     }
 
     @RequestMapping(value = "/img/{imgUrl}", method = RequestMethod.GET)
