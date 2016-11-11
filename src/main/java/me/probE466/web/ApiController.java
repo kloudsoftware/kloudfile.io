@@ -1,0 +1,49 @@
+package me.probE466.web;
+
+import com.google.gson.Gson;
+import me.probE466.persistence.entities.File;
+import me.probE466.persistence.entities.User;
+import me.probE466.persistence.repos.UserRepository;
+import me.probE466.persistence.services.FileService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+
+import javax.persistence.EntityNotFoundException;
+import java.util.ArrayList;
+import java.util.InputMismatchException;
+import java.util.List;
+
+@Controller
+public class ApiController {
+
+    private final Gson GSON = new Gson();
+    @Autowired
+    private FileService fileService;
+    @Autowired
+    private UserRepository userRepository;
+
+    @RequestMapping(value = "/api/list", method = RequestMethod.GET, produces = "text/plain")
+    public
+    @ResponseBody
+    String getList(@RequestHeader("Authorization") String apiKey, @RequestHeader(required = false, value = "start") Integer start,
+                   @RequestHeader(required = false, value = "limit") Integer limit) {
+        User user = userRepository.findByUserKey(apiKey).orElseThrow(EntityNotFoundException::new);
+        List<FileDTO> returnList = new ArrayList<>();
+        if (start == null && limit == null) {
+            for (File file : user.getFileList()) {
+                String ext;
+
+                try {
+                    ext = fileService.getExt(file.getFileName());
+                } catch (InputMismatchException e) {
+                    ext = "";
+                }
+
+                returnList.add(new FileDTO(file.getId(), file.getFileUrl(), file.getFileDeleteUrl(), file.getIsImage(),
+                        ext, file.getFileName(), file.getFileDateCreated(), file.getFileDateUpdated()));
+            }
+        }
+        return GSON.toJson(returnList);
+    }
+}

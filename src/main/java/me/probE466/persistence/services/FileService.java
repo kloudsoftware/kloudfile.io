@@ -50,7 +50,7 @@ public class FileService {
             return fileRepository.findByFileHash(hash).get();
         }
         dstFile.setIsImage(isImage(fileName));
-        dstFile.setFileHash(hash);
+        dstFile.setFileHash(hash + user.getUserName() + user.getId());
         dstFile.setFileName(fileName);
         dstFile.setFileUrl(generateFileUrl());
         try (FileInputStream saveFileIn = new FileInputStream(fsinFile)) {
@@ -110,7 +110,7 @@ public class FileService {
         return "mp3".equals(ext);
     }
 
-    private String getExt(String fileName) {
+    public String getExt(String fileName) throws InputMismatchException {
         String[] strArr = fileName.split("\\.");
         if (strArr.length <= 1) {
             throw new InputMismatchException();
