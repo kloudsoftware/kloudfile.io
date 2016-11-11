@@ -18,6 +18,8 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.Date;
+import java.util.InputMismatchException;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -54,8 +56,10 @@ public class FileService {
         try (FileInputStream saveFileIn = new FileInputStream(fsinFile)) {
             dstFile.setFilePath(saveFile(saveFileIn, dstFile.getIsImage()));
         }
-        dstFile.setFileDeleteUrl(dstFile.getFileUrl() + generateFileUrl());
+        dstFile.setFileDeleteUrl(dstFile.getFileUrl() + generateFileUrl() + generateFileUrl());
         dstFile.setUserId(user);
+        dstFile.setFileDateCreated(new Date(System.currentTimeMillis()));
+        dstFile.setFileDateUpdated(new Date(System.currentTimeMillis()));
         fileRepository.save(dstFile);
         user.getFileList().add(dstFile);
         userRepository.save(user);
@@ -80,13 +84,40 @@ public class FileService {
     }
 
     private boolean isImage(final String fileName) {
-        String[] strArr = fileName.split("\\.");
-        if (strArr.length <= 1) {
+        String ext;
+        try {
+            ext = getExt(fileName);
+        } catch (InputMismatchException e) {
             return false;
         }
-        String ext = strArr[strArr.length - 1].toLowerCase();
-        return ext.equals("png") || ext.equals("jpg") || ext.equals("bmp") || ext.equals("gif") || ext.equals("jpeg");
+        return "png".equals(ext) || "jpg".equals(ext) || "bmp".equals(ext)
+                || "gif".equals(ext) || "jpeg".equals(ext) || "mp4".equals(ext)
+                || "mp3".equals(ext) || "wav".equals(ext);
     }
+
+    public boolean isVideo(File file) {
+        String ext = getExt(file.getFileName());
+        return "mp4".equals(ext);
+    }
+
+    public boolean isAudio(File file) {
+        String ext = getExt(file.getFileName());
+        return "mp3".equals(ext) || "wav".equals(ext);
+    }
+
+    public boolean isMp3(File file) {
+        String ext = getExt(file.getFileName());
+        return "mp3".equals(ext);
+    }
+
+    private String getExt(String fileName) {
+        String[] strArr = fileName.split("\\.");
+        if (strArr.length <= 1) {
+            throw new InputMismatchException();
+        }
+        return strArr[strArr.length - 1].toLowerCase();
+    }
+
 
     private String saveFile(InputStream fsin, boolean isImage) throws IOException {
         java.io.File svFile;
@@ -118,7 +149,6 @@ public class FileService {
         return svFile.getPath();
     }
 
-
     private String calcSHA2(InputStream input) throws IOException, NoSuchAlgorithmException {
         MessageDigest sha2 = MessageDigest.getInstance("SHA-256");
         byte[] buffer = new byte[8192];
@@ -141,7 +171,6 @@ public class FileService {
                 @Override
                 public FileVisitResult
                 visitFile(Path file, BasicFileAttributes attrs) {
-
                     size.addAndGet(attrs.size());
                     return FileVisitResult.CONTINUE;
                 }
@@ -149,19 +178,16 @@ public class FileService {
                 @Override
                 public FileVisitResult
                 visitFileFailed(Path file, IOException exc) {
-
                     System.out.println("skipped: " + file + " (" + exc + ")");
-                    // Skip folders that can't be traversed
                     return FileVisitResult.CONTINUE;
                 }
 
                 @Override
                 public FileVisitResult
                 postVisitDirectory(Path dir, IOException exc) {
-
-                    if (exc != null)
+                    if (exc != null) {
                         System.out.println("had trouble traversing: " + dir + " (" + exc + ")");
-                    // Ignore errors traversing a folder
+                    }
                     return FileVisitResult.CONTINUE;
                 }
             });
@@ -171,5 +197,4 @@ public class FileService {
 
         return size.get();
     }
-
 }

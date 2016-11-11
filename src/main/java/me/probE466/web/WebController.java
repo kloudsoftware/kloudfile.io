@@ -27,7 +27,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
-import java.nio.file.Files;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.text.DecimalFormat;
@@ -216,7 +215,8 @@ public class WebController {
     }
 
     @RequestMapping(value = "/delete/{fileDeleteUrl}", method = RequestMethod.GET)
-    public @ResponseBody
+    public
+    @ResponseBody
     ResponseEntity deleteFile(@PathVariable("fileDeleteUrl") String fileUrl) throws IOException {
         final Optional<File> fileOptional = fileService.getFileRepository().findByFileDeleteUrl(fileUrl);
 
@@ -242,7 +242,25 @@ public class WebController {
             if (oFile.isPresent() && oFile.get().getIsImage()) {
                 File file = oFile.get();
                 fsin = new FileInputStream(new java.io.File(file.getFilePath()));
-                response.setContentType("image/png");
+
+                if (fileService.isVideo(file)) {
+                    response.setContentType("video/mp4");
+                    response.addHeader("Connection", "keep-alive");
+                    response.addHeader("Accept-Ranges", "bytes");
+                } else if (fileService.isAudio(file)) {
+                    if(fileService.isMp3(file)) {
+                        response.addHeader("audio","mpeg");
+                        response.addHeader("Accept-Ranges", "bytes");
+                        response.setContentType("audio/mpeg");
+                    } else {
+                        response.addHeader("audio", "wav");
+                        response.addHeader("Accept-Ranges", "bytes");
+                        response.setContentType("audio/wav");
+                    }
+                } else {
+                    response.setContentType("image/png");
+                }
+
                 response.setContentLengthLong(fsin.available());
                 IOUtils.copy(fsin, response.getOutputStream());
                 response.flushBuffer();
@@ -250,6 +268,7 @@ public class WebController {
                 fileService.getFileRepository().save(file);
             } else {
                 response.sendError(404);
+                throw new EntityNotFoundException();
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -270,9 +289,7 @@ public class WebController {
         try {
             if (oFile.isPresent()) {
                 File file = oFile.get();
-
                 fsin = new FileInputStream(new java.io.File(file.getFilePath()));
-
                 response.setContentType(MediaType.APPLICATION_OCTET_STREAM.toString());
                 response.addHeader("Content-Disposition", "attachment; filename=" + file.getFileName());
                 IOUtils.copy(fsin, response.getOutputStream());
@@ -281,7 +298,8 @@ public class WebController {
                 file.setFileViewed(file.getFileViewed() + 1);
                 fileService.getFileRepository().save(file);
             } else {
-                throw new EntityNotFoundException("FILE NOT FOUND");
+                response.sendError(404);
+                throw new EntityNotFoundException();
             }
         } catch (EntityNotFoundException e) {
             e.printStackTrace();
