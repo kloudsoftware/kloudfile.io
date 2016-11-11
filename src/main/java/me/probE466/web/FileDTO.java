@@ -4,15 +4,90 @@ import java.util.Date;
 
 public class FileDTO {
 
-    final private Integer id;
-    final private String fileUrl;
-    final private String fileDeleteUrl;
-    final private boolean isViewAble;
-    final private String fileExtension;
-    final private String fileName;
-    private final Date fileDateCreated;
-    private final Date fileDateUpdated;
-    private final long viewCount;
+    private Integer id;
+    private String fileUrl;
+    private String fileDeleteUrl;
+    private boolean isViewAble;
+    private String fileExtension;
+    private String fileName;
+    private Date fileDateCreated;
+    private Date fileDateUpdated;
+    private long viewCount;
+
+    public FileDTO() {
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getFileUrl() {
+        return fileUrl;
+    }
+
+    public void setFileUrl(String fileUrl) {
+        this.fileUrl = fileUrl;
+    }
+
+    public String getFileDeleteUrl() {
+        return fileDeleteUrl;
+    }
+
+    public void setFileDeleteUrl(String fileDeleteUrl) {
+        this.fileDeleteUrl = fileDeleteUrl;
+    }
+
+    public boolean isViewAble() {
+        return isViewAble;
+    }
+
+    public void setViewAble(boolean viewAble) {
+        isViewAble = viewAble;
+    }
+
+    public String getFileExtension() {
+        return fileExtension;
+    }
+
+    public void setFileExtension(String fileExtension) {
+        this.fileExtension = fileExtension;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public Date getFileDateCreated() {
+        return fileDateCreated;
+    }
+
+    public void setFileDateCreated(Date fileDateCreated) {
+        this.fileDateCreated = fileDateCreated;
+    }
+
+    public Date getFileDateUpdated() {
+        return fileDateUpdated;
+    }
+
+    public void setFileDateUpdated(Date fileDateUpdated) {
+        this.fileDateUpdated = fileDateUpdated;
+    }
+
+    public long getViewCount() {
+        return viewCount;
+    }
+
+    public void setViewCount(long viewCount) {
+        this.viewCount = viewCount;
+    }
 
     public FileDTO(Integer id, String fileUrl, String fileDeleteUrl, boolean isViewAble,
                    String fileExtension, String fileName, Date fileDateCreated,

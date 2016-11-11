@@ -44,13 +44,13 @@ public class FileService {
         File dstFile = new File();
         String hash;
         try (FileInputStream hashStream = new FileInputStream(fsinFile)) {
-            hash = calcSHA2(hashStream);
+            hash = calcSHA2(hashStream) + user.getUserName() + user.getId();
         }
         if (fileRepository.findByFileHash(hash).isPresent()) {
             return fileRepository.findByFileHash(hash).get();
         }
         dstFile.setIsImage(isImage(fileName));
-        dstFile.setFileHash(hash + user.getUserName() + user.getId());
+        dstFile.setFileHash(hash);
         dstFile.setFileName(fileName);
         dstFile.setFileUrl(generateFileUrl());
         try (FileInputStream saveFileIn = new FileInputStream(fsinFile)) {

@@ -5,14 +5,25 @@ import me.probE466.persistence.entities.File;
 import me.probE466.persistence.entities.User;
 import me.probE466.persistence.repos.UserRepository;
 import me.probE466.persistence.services.FileService;
+import org.apache.tomcat.util.http.fileupload.FileItemIterator;
+import org.apache.tomcat.util.http.fileupload.FileItemStream;
+import org.apache.tomcat.util.http.fileupload.FileUploadException;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.apache.tomcat.util.http.fileupload.servlet.ServletFileUpload;
+import org.apache.tomcat.util.http.fileupload.util.Streams;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.EntityNotFoundException;
-import java.util.ArrayList;
-import java.util.InputMismatchException;
-import java.util.List;
+import javax.servlet.http.HttpServletRequest;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.NoSuchAlgorithmException;
+import java.util.*;
 
 @Controller
 public class ApiController {
@@ -23,7 +34,7 @@ public class ApiController {
     @Autowired
     private UserRepository userRepository;
 
-    @RequestMapping(value = "/api/list", method = RequestMethod.GET, produces = "text/plain")
+    @RequestMapping(value = "/api/list", method = RequestMethod.GET, produces = "application/json")
     public
     @ResponseBody
     String getList(@RequestHeader("Authorization") String apiKey, @RequestHeader(required = false, value = "start") Integer start,
@@ -90,5 +101,102 @@ public class ApiController {
 
         }
         return GSON.toJson(returnList);
+    }
+
+    @RequestMapping(value = "/api/post", method = RequestMethod.POST, produces = "application/json", headers = "Accept=*/*", consumes = "multipart/*")
+    public
+    @ResponseBody
+    String postFile(HttpServletRequest request) throws IOException, FileUploadException {
+        ServletFileUpload servletFileUpload = new ServletFileUpload();
+        FileItemIterator iterator = servletFileUpload.getItemIterator(request);
+        String key;
+        User user = null;
+        InputStream filein = null;
+        String fileName = "tempfile" + UUID.randomUUID().toString() + System.currentTimeMillis();
+        String originalFileName = "";
+        java.io.File file = null;
+        File fileServiceFile = null;
+        boolean authorizedRequest = false;
+        boolean badFile = false;
+        String jsonResponse = "";
+
+        while (iterator.hasNext()) {
+            FileItemStream fileItem = iterator.next();
+            if (fileItem.isFormField()) {
+                InputStream is = fileItem.openStream();
+                key = Streams.asString(is);
+                if (userRepository.findByUserKey(key).isPresent()) {
+                    user = userRepository.findByUserKey(key).get();
+                    authorizedRequest = true;
+                }
+            } else {
+                filein = fileItem.openStream();
+                file = new java.io.File(fileName);
+                badFile = !file.createNewFile();
+                originalFileName = fileItem.getName();
+                FileOutputStream fileOutputStream = new FileOutputStream(file);
+                IOUtils.copy(filein, fileOutputStream);
+                fileOutputStream.flush();
+                fileOutputStream.close();
+            }
+        }
+
+        if (file == null) {
+            badFile = true;
+        }
+
+        try {
+            if (authorizedRequest && !badFile) {
+                fileServiceFile = fileService.createFile(file, originalFileName, user);
+                file.delete();
+            } else if (badFile) {
+                throw new FileUploadException("bad file");
+            } else {
+                file.delete();
+                throw new SecurityException("API KEY NOT RECOGNIZED");
+            }
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } finally {
+            if (filein != null) {
+                filein.close();
+            }
+            file.delete();
+        }
+
+
+        String contextString = "";
+        if (fileServiceFile != null) {
+            if (fileServiceFile.getIsImage()) {
+                contextString += "/img/";
+            } else {
+                contextString += "/file/";
+            }
+        }
+        contextString += fileServiceFile != null ? fileServiceFile.getFileUrl() : null;
+
+        if (fileServiceFile != null) {
+            jsonResponse = GSON.toJson(new UrlDTO(contextString, "/api/delete/" + fileServiceFile.getFileDeleteUrl()));
+        }
+
+        return jsonResponse;
+    }
+
+    @RequestMapping(value = "/api/delete/{fileDeleteUrl}", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity deleteFile(@PathVariable("fileDeleteUrl") String fileUrl) throws IOException {
+        final Optional<File> fileOptional = fileService.getFileRepository().findByFileDeleteUrl(fileUrl);
+
+        if (fileOptional.isPresent()) {
+            final File file = fileOptional.get();
+            final java.io.File javaFile = new java.io.File(file.getFilePath());
+            if (javaFile.delete()) {
+                fileService.getFileRepository().delete(file);
+                return new ResponseEntity(HttpStatus.OK);
+            }
+        }
+
+        return new ResponseEntity(HttpStatus.NOT_ACCEPTABLE);
     }
 }
