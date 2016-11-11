@@ -12,10 +12,11 @@ public class FileDTO {
     final private String fileName;
     private final Date fileDateCreated;
     private final Date fileDateUpdated;
+    private final long viewCount;
 
     public FileDTO(Integer id, String fileUrl, String fileDeleteUrl, boolean isViewAble,
                    String fileExtension, String fileName, Date fileDateCreated,
-                   Date fileDateUpdated) {
+                   Date fileDateUpdated, long viewCount) {
         this.id = id;
         this.fileUrl = fileUrl;
         this.fileDeleteUrl = fileDeleteUrl;
@@ -24,5 +25,6 @@ public class FileDTO {
         this.fileName = fileName;
         this.fileDateCreated = fileDateCreated;
         this.fileDateUpdated = fileDateUpdated;
+        this.viewCount = viewCount;
     }
 }
