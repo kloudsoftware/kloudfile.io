@@ -34,4 +34,4 @@ Next, navigate to your domain and you should be greeted by the "logo" of kloudfi
 
 You can view your stats by going to http(s)://your_domain.ext/stats, create api keys by visiting http(s)://your_domain.ext/admin and from there also see a list of all api keys and revoke them, if you wish to.
 
-To upload to the server you can use something like https://www.getpostman.com/ , write your own application to use the service(specifications not finished) or use our client(documentation still not complete): https://github.com/probE466/kloudfile.io-client
+To upload to the server you can use something like use our [**client**](https://github.com/probE466/kloudfile.io-client), [Postman](https://www.getpostman.com/), or write your own application to use the service(specifications not finished).
