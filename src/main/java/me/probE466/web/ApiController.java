@@ -42,6 +42,7 @@ public class ApiController {
         User user = userRepository.findByUserKey(apiKey).orElseThrow(EntityNotFoundException::new);
         List<FileDTO> returnList = new ArrayList<>();
         List<File> fileList = user.getFileList();
+        fileList = reverseList(fileList);
         if (start == null && limit == null) {
             for (File file : fileList) {
                 String ext;
@@ -101,6 +102,16 @@ public class ApiController {
 
         }
         return GSON.toJson(returnList);
+    }
+
+    private List<File> reverseList(List<File> fileList) {
+        List<File> returnList = new ArrayList<>();
+
+        for (int i = fileList.size() - 1; i <= 0; i--) {
+            returnList.add(fileList.get(i));
+        }
+
+        return returnList;
     }
 
     @RequestMapping(value = "/api/post", method = RequestMethod.POST, produces = "application/json", headers = "Accept=*/*", consumes = "multipart/*")
