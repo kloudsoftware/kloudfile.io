@@ -75,7 +75,7 @@ public class ApiController {
                         ext, file.getFileName(), file.getFileDateCreated(), file.getFileDateUpdated(), file.getFileViewed()));
                 currentIndex++;
             }
-        } else if (start != null && start > 0 && limit != 0) {
+        } else if (start != null && start >= 0 && limit != 0) {
             if (start > fileList.size()) {
                 return "[]";
             }
