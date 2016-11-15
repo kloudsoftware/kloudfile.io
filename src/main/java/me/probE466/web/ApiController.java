@@ -107,7 +107,7 @@ public class ApiController {
     private List<File> reverseList(List<File> fileList) {
         List<File> returnList = new ArrayList<>();
 
-        for (int i = fileList.size() - 1; i <= 0; i--) {
+        for (int i = fileList.size() - 1; i >= 0; i--) {
             returnList.add(fileList.get(i));
         }
 
