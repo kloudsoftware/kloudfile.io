@@ -134,12 +134,17 @@ public class WebController {
         return new String(buffer);
     }
 
+    @RequestMapping(value = "/v/{res}")
+    public ModelAndView displayInBrowser(@PathVariable("res") String resource) {
+        return new ModelAndView("res");
+    }
 
-    @RequestMapping(value = "/img/{imgUrl}", method = RequestMethod.GET)
+
+    @RequestMapping(value = "/res/{res}", method = RequestMethod.GET)
     public
     @ResponseBody
-    void getImage(@PathVariable("imgUrl") String imgUrl, HttpServletResponse response) throws IOException {
-        Optional<File> oFile = fileService.getFileRepository().findByFileUrl(imgUrl);
+    void getViewable(@PathVariable("res") String resource, HttpServletResponse response) throws IOException {
+        Optional<File> oFile = fileService.getFileRepository().findByFileUrl(resource);
         FileInputStream fsin = null;
         try {
             if (oFile.isPresent() && oFile.get().getIsImage()) {
