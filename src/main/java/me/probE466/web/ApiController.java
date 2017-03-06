@@ -104,6 +104,16 @@ public class ApiController {
         return GSON.toJson(returnList);
     }
 
+    @RequestMapping(value = "/api/users", method = RequestMethod.GET, produces = "application/json")
+    public
+    @ResponseBody
+    String getUserList() {
+        List<UserStatisticsDTO> userStatisticsDTOList = new ArrayList<>();
+        userRepository.findAll().forEach(user -> userStatisticsDTOList.add(new UserStatisticsDTO(user.getUserName(), user.getFileList().size())));
+
+        return GSON.toJson(userStatisticsDTOList);
+    }
+
     private List<File> reverseList(List<File> fileList) {
         List<File> returnList = new ArrayList<>();
 
