@@ -1,4 +1,4 @@
-package me.probE466.web;
+package io.kloudfile.web;
 
 public class UserStatisticsDTO {
     private final String userName;
