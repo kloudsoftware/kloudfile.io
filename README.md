@@ -12,7 +12,7 @@ I would also advise to get a URL and a SSL certificate (we used letsencrypt).
 
 First, you need to clone the repo into a folder of your choice,
 
-    git clone https://github.com/probE466/kloudfile.io.git
+    git clone https://github.com/kloudsoftware/kloudfile.io.git
     
 Then, navigate into src/main/resources and modify the application.properties with the correct login for your mysql user and change the password for your admin backend from
 
@@ -34,4 +34,4 @@ Next, navigate to your domain and you should be greeted by the "logo" of kloudfi
 
 You can view your stats by going to http(s)://your_domain.ext/stats, create api keys by visiting http(s)://your_domain.ext/admin and from there also see a list of all api keys and revoke them, if you wish to.
 
-To upload to the server you can use something like use our [**client**](https://github.com/probE466/kloudfile.io-client), [Postman](https://www.getpostman.com/), or write your own application to use the service(specifications not finished).
+To upload to the server you can use something like use our [**client**](https://github.com/kloudsoftware/kloudfile.io-client), [Postman](https://www.getpostman.com/), or write your own application to use the service(specifications not finished).
