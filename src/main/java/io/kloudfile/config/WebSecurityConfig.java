@@ -1,4 +1,4 @@
-package me.probE466.config;
+package io.kloudfile.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 

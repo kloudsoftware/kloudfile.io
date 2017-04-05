@@ -1,6 +1,6 @@
-package me.probE466.persistence.repos;
+package io.kloudfile.persistence.repos;
 
-import me.probE466.persistence.entities.User;
+import io.kloudfile.persistence.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

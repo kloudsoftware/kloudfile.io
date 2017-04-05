@@ -1,10 +1,10 @@
-package me.probE466.web;
+package io.kloudfile.web;
 
 import com.google.gson.Gson;
-import me.probE466.persistence.entities.File;
-import me.probE466.persistence.entities.User;
-import me.probE466.persistence.repos.UserRepository;
-import me.probE466.persistence.services.FileService;
+import io.kloudfile.persistence.services.FileService;
+import io.kloudfile.persistence.entities.File;
+import io.kloudfile.persistence.entities.User;
+import io.kloudfile.persistence.repos.UserRepository;
 import org.apache.tomcat.util.http.fileupload.FileItemIterator;
 import org.apache.tomcat.util.http.fileupload.FileItemStream;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;

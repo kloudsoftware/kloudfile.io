@@ -1,23 +1,21 @@
-package me.probE466.persistence.services;
+package io.kloudfile.persistence.services;
 
 
-import me.probE466.persistence.entities.File;
-import me.probE466.persistence.entities.User;
-import me.probE466.persistence.repos.FileRepository;
-import me.probE466.persistence.repos.UserRepository;
+import io.kloudfile.persistence.entities.File;
+import io.kloudfile.persistence.entities.User;
+import io.kloudfile.persistence.repos.FileRepository;
+import io.kloudfile.persistence.repos.UserRepository;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.persistence.EntityExistsException;
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import java.io.*;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.util.Date;
 import java.util.InputMismatchException;
 import java.util.UUID;
