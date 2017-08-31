@@ -189,7 +189,7 @@ public class ApiController {
         String contextString = "";
         if (fileServiceFile != null) {
             if (fileServiceFile.getIsImage()) {
-                contextString += "/img/";
+                contextString += "/res/";
             } else {
                 contextString += "/file/";
             }
