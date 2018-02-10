@@ -1,18 +1,10 @@
 package io.kloudfile.persistence.entities;
 
-import java.io.Serializable;
-import java.util.List;
-import javax.persistence.Basic;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
+import java.io.Serializable;
+import java.util.List;
 
 @Entity
 @Table(name = "user")
@@ -36,12 +28,26 @@ public class User implements Serializable {
     private String userName;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "userId")
     private List<File> fileList;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "userId")
+    private List<Url> urlList;
 
     public User() {
     }
 
     public User(Integer id) {
         this.id = id;
+    }
+
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
+    }
+
+    public List<Url> getUrlList() {
+        return urlList;
+    }
+
+    public void setUrlList(List<Url> urlList) {
+        this.urlList = urlList;
     }
 
     public Integer getId() {

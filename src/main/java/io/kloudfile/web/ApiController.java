@@ -1,6 +1,8 @@
 package io.kloudfile.web;
 
 import com.google.gson.Gson;
+import io.kloudfile.persistence.entities.Url;
+import io.kloudfile.persistence.repos.UrlRepository;
 import io.kloudfile.persistence.services.FileService;
 import io.kloudfile.persistence.entities.File;
 import io.kloudfile.persistence.entities.User;
@@ -33,6 +35,8 @@ public class ApiController {
     private FileService fileService;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private UrlRepository urlRepository;
 
     @RequestMapping(value = "/api/list", method = RequestMethod.GET, produces = "application/json")
     public
@@ -122,6 +126,22 @@ public class ApiController {
         }
 
         return returnList;
+    }
+
+    @RequestMapping(value = "/api/short")
+    public
+    @ResponseBody
+    String shortUrl(@RequestParam(value = "lnk") String lnk, @RequestParam String key) {
+        User user = userRepository.findByUserKey(key).orElseThrow(SecurityException::new);
+        if("".equals(lnk)) {
+            throw new InputMismatchException("Expected url, recieved: " + lnk);
+        }
+        Url url = new Url(lnk);
+        url.setUrl(fileService.generateUrl());
+        user.getUrlList().add(url);
+        urlRepository.save(url);
+        userRepository.save(user);
+        return GSON.toJson(url);
     }
 
     @RequestMapping(value = "/api/post", method = RequestMethod.POST, produces = "application/json", headers = "Accept=*/*", consumes = "multipart/*")

@@ -4,6 +4,7 @@ package io.kloudfile.persistence.services;
 import io.kloudfile.persistence.entities.File;
 import io.kloudfile.persistence.entities.User;
 import io.kloudfile.persistence.repos.FileRepository;
+import io.kloudfile.persistence.repos.UrlRepository;
 import io.kloudfile.persistence.repos.UserRepository;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
@@ -33,6 +34,8 @@ public class FileService {
     private FileRepository fileRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private UrlRepository urlRepository;
 
     public FileRepository getFileRepository() {
         return fileRepository;
@@ -50,11 +53,11 @@ public class FileService {
         dstFile.setIsImage(isImage(fileName));
         dstFile.setFileHash(hash);
         dstFile.setFileName(fileName);
-        dstFile.setFileUrl(generateFileUrl());
+        dstFile.setFileUrl(generateUrl());
         try (FileInputStream saveFileIn = new FileInputStream(fsinFile)) {
             dstFile.setFilePath(saveFile(saveFileIn, dstFile.getIsImage()));
         }
-        dstFile.setFileDeleteUrl(dstFile.getFileUrl() + generateFileUrl() + generateFileUrl());
+        dstFile.setFileDeleteUrl(dstFile.getFileUrl() + generateUrl() + generateUrl());
         dstFile.setUserId(user);
         dstFile.setFileDateCreated(new Date(System.currentTimeMillis()));
         dstFile.setFileDateUpdated(new Date(System.currentTimeMillis()));
@@ -64,12 +67,13 @@ public class FileService {
         return dstFile;
     }
 
-    private String generateFileUrl() {
+    public String generateUrl() {
         boolean done = false;
         float probability = 5.0f;
         while (!done) {
             String tmpUrl = RandomStringUtils.randomAlphanumeric((int) probability);
-            boolean collided = fileRepository.findByFileUrl(tmpUrl).isPresent() || fileRepository.findByFileDeleteUrl(tmpUrl).isPresent();
+            boolean collided = fileRepository.findByFileUrl(tmpUrl).isPresent() || fileRepository.findByFileDeleteUrl(tmpUrl).isPresent()
+                    || urlRepository.findByUrl(tmpUrl).isPresent();
             if (!collided) {
                 return tmpUrl;
             }
