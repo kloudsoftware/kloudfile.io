@@ -25,10 +25,9 @@ import java.util.concurrent.atomic.AtomicLong;
 @Component
 public class FileService {
 
-
-    private final java.io.File fileDir = new java.io.File(System.getProperty("user.home") + "/push/files");
-    private final java.io.File imageDir = new java.io.File(System.getProperty("user.home") + "/push/images");
-    private final java.io.File pushDir = new java.io.File(System.getProperty("user.home") + "/push");
+    private final java.io.File fileDir = new java.io.File("/var/kloudfile/push/files");
+    private final java.io.File imageDir = new java.io.File("/var/kloudfile/push/images");
+    private final java.io.File pushDir = new java.io.File("/var/kloudfile/push");
 
     @Autowired
     private FileRepository fileRepository;
