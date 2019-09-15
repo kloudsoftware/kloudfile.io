@@ -132,7 +132,7 @@ public class WebController {
     @RequestMapping(value = "/res/{res}", method = RequestMethod.GET)
     public
     @ResponseBody
-    void getViewable(@PathVariable("res") String resource, HttpServletResponse response) throws IOException {
+    void getViewable(@PathVariable("res") String resource, @RequestParam(value = "apiOnly", required = false, defaultValue = "false") String apiOnly, HttpServletResponse response) throws IOException {
         Optional<File> oFile = fileService.getFileRepository().findByFileUrl(resource);
         FileInputStream fsin = null;
         try {
@@ -145,8 +145,8 @@ public class WebController {
                     response.addHeader("Connection", "keep-alive");
                     response.addHeader("Accept-Ranges", "bytes");
                 } else if (fileService.isAudio(file)) {
-                    if(fileService.isMp3(file)) {
-                        response.addHeader("audio","mpeg");
+                    if (fileService.isMp3(file)) {
+                        response.addHeader("audio", "mpeg");
                         response.addHeader("Accept-Ranges", "bytes");
                         response.setContentType("audio/mpeg");
                     } else {
@@ -161,7 +161,11 @@ public class WebController {
                 response.setContentLengthLong(fsin.available());
                 IOUtils.copy(fsin, response.getOutputStream());
                 response.flushBuffer();
-                file.setFileViewed(file.getFileViewed() + 1);
+
+                if (apiOnly.equals("false")) {
+                    file.setFileViewed(file.getFileViewed() + 1);
+                }
+
                 fileService.getFileRepository().save(file);
             } else {
                 response.sendError(404);
