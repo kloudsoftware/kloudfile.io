@@ -36,10 +36,5 @@ dependencies {
 	compile group: 'commons-lang', name: 'commons-lang', version: '2.6'
 	// https://mvnrepository.com/artifact/com.google.code.gson/gson
 	compile group: 'com.google.code.gson', name: 'gson', version: '2.7'
-
-
-
-
-
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 }

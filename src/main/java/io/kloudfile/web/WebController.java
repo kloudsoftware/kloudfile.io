@@ -14,12 +14,15 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.HttpServletResponse;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.security.SecureRandom;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.List;
 
 @Controller
 public class WebController {
@@ -132,13 +135,29 @@ public class WebController {
     @RequestMapping(value = "/res/{res}", method = RequestMethod.GET)
     public
     @ResponseBody
-    void getViewable(@PathVariable("res") String resource, @RequestParam(value = "apiOnly", required = false, defaultValue = "false") String apiOnly, HttpServletResponse response) throws IOException {
+    void getViewable(@PathVariable("res") String resource, @RequestParam(value = "apiOnly", required = false, defaultValue = "false") String apiOnly, @RequestParam(value = "small", required = false, defaultValue = "false") String small, HttpServletResponse response) throws IOException {
         Optional<File> oFile = fileService.getFileRepository().findByFileUrl(resource);
         FileInputStream fsin = null;
         try {
             if (oFile.isPresent() && oFile.get().getIsImage()) {
                 File file = oFile.get();
-                fsin = new FileInputStream(new java.io.File(file.getFilePath()));
+
+
+                if (small.equals("true")) {
+                    java.io.File minFile = new java.io.File(file.getFilePath() + ".min");
+
+                    if (!minFile.exists()) {
+                        Process proc = Runtime.getRuntime().exec(new String[]{"convert", "-define", "jpeg:size=500x180", file.getFilePath(),
+                                "-auto-orient", "-thumbnail", "150x150", "-unsharp", "0x.5", minFile.getAbsolutePath()});
+
+                        proc.waitFor();
+                    }
+
+                    fsin = new FileInputStream(minFile);
+                } else {
+                    fsin = new FileInputStream(new java.io.File(file.getFilePath()));
+                }
+
 
                 if (fileService.isVideo(file)) {
                     response.setContentType("video/mp4");
@@ -162,6 +181,7 @@ public class WebController {
                 IOUtils.copy(fsin, response.getOutputStream());
                 response.flushBuffer();
 
+
                 if (apiOnly.equals("false")) {
                     file.setFileViewed(file.getFileViewed() + 1);
                 }
@@ -171,7 +191,7 @@ public class WebController {
                 response.sendError(404);
                 throw new EntityNotFoundException();
             }
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         } finally {
             if (fsin != null) {
